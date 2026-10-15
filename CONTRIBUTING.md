@@ -1,5 +1,7 @@
 # Contribuir com o GuiaFotos
 
+**Português (Brasil)** | [English (US)](CONTRIBUTING.en-US.md)
+
 Contribuições de programação, correções e testes são bem-vindos. Comece por uma issue curta com o problema ou a melhoria proposta.
 
 ## Onde trabalhar

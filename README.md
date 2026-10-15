@@ -1,5 +1,7 @@
 # GuiaFotos
 
+**Português (Brasil)** | [English (US)](README.en-US.md)
+
 Organizador de fotos para Windows, inspirado na praticidade do Picasa, com foco em encontrar pessoas e reunir versões da mesma fotografia.
 
 **Projeto em desenvolvimento · 0.2.0 de pré-validação.**
