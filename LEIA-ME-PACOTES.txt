@@ -1,0 +1,113 @@
+GuiaFotos 0.2.0 — Windows 10/11 x64 — instalador e portátil
+
+Instalador: abra GuiaFotos-0.2.0-Setup.exe e clique em Instalar.
+Instala por usuário em %LOCALAPPDATA%\Programs\GuiaFotos, com atalhos e
+desinstalação em Configurações > Aplicativos. O catálogo fica separado em
+%LOCALAPPDATA%\GuiaFotos e não é apagado na desinstalação. Para atualizar,
+feche e desinstale a versão anterior primeiro; seu catálogo será preservado.
+
+Portátil: extraia o ZIP inteiro em pasta gravável e abra GuiaFotos.exe.
+Mantenha portable.marker, tools e Data juntos. Não copie apenas o EXE.
+O catálogo e as configurações ficam em Data. Preserve Data ao atualizar.
+DPAPI protege credenciais do usuário original; em outro usuário/PC,
+autentique de novo. Caminhos de fotos são absolutos: outra pasta/unidade
+pode exigir reimportar fotos. Não migra automaticamente bancos do Picasa.
+
+DUPLICATAS RÁPIDAS
+Tamanho + primeiros 16 KB + últimos 16 KB, com xxHash64. Não calcula
+SHA-256 na importação nem na busca de duplicatas. Candidatos rápidos usa
+o índice salvo. Confirmar idênticos relê as amostras dos arquivos com mesmo
+tamanho e compara bytes completos somente dos candidatos. Amostras iguais
+não provam que o miolo do arquivo é igual. Nenhuma exclusão é automática.
+O cache reaproveita data/tamanho/amostra, miniaturas, EXIF e assinaturas;
+alterações fora das amostras com data/tamanho preservados podem escapar
+da atualização rápida, mas a confirmação por bytes detecta diferenças.
+Semelhança de fotos usa pHash + dHash; vídeos usam duração e três quadros.
+
+PESSOAS
+Na aba Pessoas, escolha Motor de reconhecimento e Analisar fotos da biblioteca.
+Há cinco motores selecionáveis; a escolha persiste ao fechar o aplicativo:
+- AdaFace IR101: perfil de qualidade, rede pesada, download ~249 MB.
+- AdaFace IR50: perfil intermediário da mesma família, download ~166 MB.
+- EdgeFace Base: arquitetura EdgeNeXt (publicação 2024), download ~70 MB.
+- EdgeFace XXS: modelo compacto, download ~5 MB.
+- SFace: motor OpenCV anterior para compatibilidade, download ~38 MB.
+A detecção pode usar SCRFD 10G (download adicional ~17 MB) ou YuNet.
+Buscar rostos pequenos analisa blocos sobrepostos de uma imagem de até
+4096 pixels no lado maior; é mais lento. O modo sem blocos usa até2400pixels. Fotos já
+processadas são retomadas do índice. Reanalisar fotos já processadas força
+uma nova leitura. Ao trocar detector, correções da mesma foto imutável são
+preservadas por correspondência geométrica + vetor. Rostos corrigidos que o
+novo detector não encontra permanecem como detecção anterior preservada.
+Os modelos são baixados só quando você ativa cada motor. Cada arquivo tem
+SHA-256 fixado; esse checksum não é usado nas fotos para procurar duplicatas.
+Cada motor mantém um índice independente com nomes, confirmações e rejeições.
+Ao voltar a um motor, o índice dele permanece; novos motores precisam analisar
+as fotos e receber nomes novamente. Vetores de motores diferentes nunca são
+comparados, mesmo se tiverem 512 dimensões. Renomeações pelo app atualizam
+todos os índices já criados. O limiar pode precisar de ajuste para cada motor.
+As descrições indicam finalidade e tamanho aproximado, não um ranking de
+precisão ou velocidade medido neste aplicativo. Novidade não garante acerto.
+O motor ONNX CPU está no pacote. Se faltar Microsoft Visual C++ x64,
+use Instalar runtime facial… (download oficial Microsoft; a instalação
+desse componente pode pedir administrador). O GuiaFotos base inclui .NET.
+Nenhuma foto/rosto é enviado a serviço de IA. Modelos baixados, miniaturas
+faciais e vetores ficam no catálogo local instalado/Data portátil.
+Selecione rostos e use Nomear selecionados / separar, ou Nomear grupo inteiro.
+Reagrupar biblioteca usa DBSCAN com restrição entre rostos distintos da mesma
+foto. A busca vetorial usa uma árvore VP exata persistente; não usa USearch.
+Unir pessoas selecionadas junta nomes; um novo nome separa rostos escolhidos.
+Desfazer correção restaura a última organização, inclusive após reabrir o app.
+Escolha a pessoa na lista para encontrar outras fotos; use Confirmar
+selecionados e Não é esta pessoa. Correções persistem e prevalecem na busca.
+Ajuste Exigência de semelhança para mais/menos sugestões. Não é probabilidade.
+Renomeações pelo app preservam nomes do índice facial. Agrupamento e busca
+percorrem o índice completo, sem o antigo limite de 1.000 rostos. A árvore
+pode se aproximar de varredura em dados difíceis; o tempo depende da coleção.
+Os limites de busca e agrupamento são salvos por motor. A ferramenta de
+calibração está em tests/GuiaFotos.FaceCorpus: exige pares reais rotulados,
+com fotos distintas para calibração e avaliação. Ela gera relatório por
+motor, sem modificar suas preferências automaticamente. Fotos em grupo/rostos pequenos, ângulos extremos,
+desfoque e aparência alterada podem não ser reconhecidos. Revise resultados.
+
+VERSÕES DE FOTOS
+Use Analisar / retomar biblioteca na aba Versões de fotos. A comparação local
+normaliza luminância e verifica estrutura em duas resoluções para sugerir
+versões com brilho, compressão ou resolução diferentes. Não usa SHA-256 das
+fotos para essa busca. Cada foto concluída é salva; cancelar e abrir de novo
+permite retomar. Reanalisar tudo força atualização.
+Os grupos completos permitem comparação lado a lado de até quatro fotos,
+união manual, separar selecionadas, escolher cópia preferida e desfazer.
+Incluir fotos isoladas mostra também o que não foi agrupado, para corrigir
+omissões. A sugestão de melhor cópia considera resolução, nitidez e exposição;
+não comprova qual é o original. Mover para lixeira exige confirmação e mantém
+a recuperação pelo Histórico. Nenhuma análise exclui fotos automaticamente.
+O modo local é heurístico; cenas quase iguais podem gerar sugestões erradas.
+Recortes fortes, marcas d'água e grandes rotações não têm precisão validada.
+SSCD é adicional e só funciona se tools/sscd contiver ONNX, licença e manifesto
+de paridade válidos. A compilação local atual NÃO inclui esse modelo.
+O build -WithSscd e o workflow exportam os pesos oficiais PyTorch uma vez,
+conferem paridade numérica e geram hash; o usuário final não precisa de Python.
+Essa etapa ainda não foi executada aqui, por falta de acesso de rede no shell.
+Desmarcar Incluir comparação SSCD impede usar seus vetores já salvos.
+
+NEXTCLOUD
+Configure URL HTTPS, usuário e senha de aplicativo; salve configurações.
+Use Testar conexão Nextcloud, Backup da seleção ou Backup de toda a biblioteca.
+Cada snapshot tem manifesto e restauração verificada. Hash de integridade
+é calculado durante o envio/download, sem uma leitura local extra antes/depois
+da transferência; o upload ainda relê o arquivo remoto para comprovar conteúdo
+armazenado. SHA-256 é mantido para integridade de backups e ações de recuperação,
+independentemente do filtro rápido de duplicatas. Não sobrescreve backups.
+
+VALIDAÇÃO
+Build de pré-validação sem assinatura digital. Compilação para Windows,
+testes de cache/duplicatas, inferência ONNX de grafo sintético, indexação de
+pessoas, DBSCAN global, índice versus força bruta, cancelamento, retomada,
+correções persistentes e transformações reais de arquivos de imagens geradas
+foram exercitados no Linux. O corpus visual local usa imagens sintéticas,
+não uma coleção representativa de fotografias naturais. Isso NÃO comprova
+a precisão dos modelos treinados em fotos reais nem execução da GUI no
+Windows. Há testes automatizados Windows e corpus facial de smoke test;
+conexão com Nextcloud real/credenciais do usuário continua não testada.
+Leia INSTRUCOES.txt, THIRD-PARTY.txt e o relatório de validação do pacote.

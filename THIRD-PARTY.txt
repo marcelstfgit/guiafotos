@@ -1,0 +1,86 @@
+Ferramentas externas são executadas em processos separados. A licença MIT
+do GuiaFotos não substitui as licenças destas dependências.
+
+ExifTool 13.59: https://exiftool.org
+Origem: https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download
+SHA256: 44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec
+Licenças: tools/exiftool_files/LICENSE e Licenses_Strawberry_Perl.zip.
+Código-fonte da distribuição Perl: https://sourceforge.net/projects/exiftool/files/
+
+ImageMagick 7.1.2-33 portable Q16 Windows x64:
+https://github.com/ImageMagick/ImageMagick/releases/tag/7.1.2-33
+SHA256 do arquivo .7z oficial:
+5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278
+Licenças/avisos de bibliotecas: tools/LICENSE.txt e tools/NOTICE.txt.
+Fonte: https://github.com/ImageMagick/ImageMagick/tree/7.1.2-33
+
+FFmpeg 8.1.2 essentials Windows x64 (Gyan):
+https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip
+SHA256: db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec
+Licença GPLv3 e configuração/origens: tools/licenses/ffmpeg/LICENSE e README.txt.
+Fonte correspondente FFmpeg: https://github.com/FFmpeg/FFmpeg/commit/38b88335f9
+O README da distribuição lista bibliotecas adicionais; a redistribuição pública
+de um pacote derivado deve respeitar também suas licenças e disponibilizar o
+código-fonte correspondente exigido. O pacote local não inclui o código-fonte
+de todos os codecs. Não publique como uma distribuição comercial final sem
+completar essa etapa de distribuição das dependências.
+
+.NET 8 Windows Desktop: Microsoft, licenças MIT e third-party notices presentes
+no runtime. SQLite e Microsoft.Data.Sqlite: domínio público/MIT.
+Microsoft.IdentityModel: MIT. System.Security.Cryptography.ProtectedData: MIT.
+Versões NuGet fixadas nos .csproj; inventário e checksums acompanham o pacote.
+
+Reconhecimento facial local: ONNX Runtime 1.27.0 (CPU), licença MIT.
+DLL extraída da distribuição oficial onnxruntime-node 1.27.0:
+https://registry.npmjs.org/onnxruntime-node/-/onnxruntime-node-1.27.0.tgz
+SHA256 DLL x64: 273f9ef9cf755c6a0f342226a80448156c10ceb74db2ae8c8370dc98e75af0eb
+Fonte: https://github.com/microsoft/onnxruntime
+Licença no pacote: tools/faces/onnxruntime-LICENSE.txt.
+
+Modelos baixados quando o usuário ativa Pessoas (não enviam imagens):
+YuNet 2023mar, MIT: https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet
+SHA256 8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4
+SFace 2021dec, Apache-2.0: https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface
+SHA256 0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79
+Licenças: tools/faces/yunet-LICENSE.txt e sface-LICENSE.txt.
+Microsoft Visual C++ Runtime é pré-requisito do motor facial: o botão do
+programa abre o download oficial https://aka.ms/vc14/vc_redist.x64.exe.
+xxHash64: implementação própria do algoritmo público, usada nas amostras
+de 16 KB iniciais/finais, sem depender de biblioteca externa.
+
+Perfis adicionais de reconhecimento (baixados sob demanda):
+AdaFace IR101 (WebFace12M) e IR50 (WebFace4M):
+Originais https://github.com/mk-minchul/AdaFace (código MIT, Minchul Kim).
+Exports ONNX https://github.com/yakhyo/adaface-onnx (MIT, Yakhyokhuja Valikhujaev).
+EdgeFace Base e XXS:
+Original https://github.com/otroshi/edgeface (BSD-3-Clause, autores/Idiap).
+Exports ONNX https://github.com/yakhyo/edgeface-onnx (MIT, Yakhyokhuja Valikhujaev).
+Licenças completas: tools/faces/adaface-LICENSE.txt, adaface-export-LICENSE.txt,
+edgeface-LICENSE.txt e edgeface-export-LICENSE.txt.
+Hashes e URLs exatos por perfil: src/GuiaFotos.Core/FaceModels.cs; valores
+conferidos no registro primário https://github.com/yakhyo/uniface/blob/main/uniface/constants.py.
+Os arquivos de pesos não estão embutidos neste pacote. Licenças do código
+não substituem eventuais condições dos pesos e bases de treinamento.
+CVLFace ViT-KP-RPE foi pesquisado, mas não está implementado: seu pipeline
+exige landmarks como entrada adicional e validação da exportação ONNX.
+
+Detecção adicional SCRFD 10G (modelo ONNX baixado sob demanda):
+https://github.com/deepinsight/insightface/tree/master/detection/scrfd
+Export/distribuição ONNX: https://github.com/yakhyo/uniface
+SHA2565838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91
+O pacote não inclui o framework de treinamento SCRFD. Pesos pré-treinados têm condições próprias,
+descritas no projeto original. Nenhum peso SCRFD é embutido no pacote local.
+
+SSCD opcional de build: https://github.com/facebookresearch/sscd-copy-detection
+Código MIT, Meta. Pesos originais sscd_disc_mixup.torchscript.pt no servidor
+oficial dl.fbaipublicfiles.com. scripts/export-sscd.py registra SHA256 da
+entrada e do ONNX, exige paridade numérica <=1e-4 em12entradas e grava manifesto.
+A paridade não equivale a medir precisão em fotos. A licença é copiada para
+tools/sscd/LICENSE.txt quando o build -WithSscd for executado com sucesso.
+Não há SSCD/RDCD/PDQ embutido nesta compilação local: o agrupamento visual
+local usa implementação própria de luminância rank e comparação estrutural.
+Árvore VP e agrupamento DBSCAN com restrições: implementação própria C#;
+USearch/HDBSCAN/Immich não foram incorporados como bibliotecas nem copiados.
+
+Referência para o protocolo ONNX SCRFD e pré-processamento: UniFace (MIT),
+Copyright(c)2024 Yakhyokhuja Valikhujaev; tools/faces/uniface-LICENSE.txt.

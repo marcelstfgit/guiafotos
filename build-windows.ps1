@@ -1,0 +1,112 @@
+param([string]$Output = "artifacts/windows-x64", [switch]$SkipPackages, [switch]$WithSscd)
+$ErrorActionPreference = "Stop"
+Set-Location $PSScriptRoot
+$downloadDir = Join-Path $PSScriptRoot "artifacts/downloads"
+$nativeDir = Join-Path $PSScriptRoot "tools/windows"
+New-Item -ItemType Directory -Force $downloadDir, $nativeDir | Out-Null
+$archives = @(
+    @{ Name="exiftool-13.59_64.zip"; Url="https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download"; Hash="44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec" },
+    @{ Name="imagemagick-7.1.2-33-x64.7z"; Url="https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"; Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" },
+    @{ Name="ffmpeg-8.1.2-win64.zip"; Url="https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip"; Hash="db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec" }
+)
+foreach ($archive in $archives) {
+    $destination = Join-Path $downloadDir $archive.Name
+    if (!(Test-Path $destination)) { Invoke-WebRequest -Uri $archive.Url -OutFile $destination }
+    if ((Get-FileHash $destination -Algorithm SHA256).Hash.ToLowerInvariant() -ne $archive.Hash) { throw "Checksum inválido: $($archive.Name)" }
+}
+Expand-Archive -Force (Join-Path $downloadDir "exiftool-13.59_64.zip") (Join-Path $downloadDir "exiftool-unpacked")
+Copy-Item -Recurse -Force (Join-Path $downloadDir "exiftool-unpacked/exiftool-13.59_64/exiftool_files") $nativeDir
+Copy-Item -Force (Join-Path $downloadDir "exiftool-unpacked/exiftool-13.59_64/exiftool(-k).exe") (Join-Path $nativeDir "exiftool.exe")
+$sevenZip = Get-Command 7z -ErrorAction SilentlyContinue
+if ($sevenZip) { & $sevenZip.Source x -y "-o$nativeDir" (Join-Path $downloadDir "imagemagick-7.1.2-33-x64.7z") | Out-Null }
+elseif (Test-Path "C:/Program Files/7-Zip/7z.exe") { & "C:/Program Files/7-Zip/7z.exe" x -y "-o$nativeDir" (Join-Path $downloadDir "imagemagick-7.1.2-33-x64.7z") | Out-Null }
+else { & tar -xf (Join-Path $downloadDir "imagemagick-7.1.2-33-x64.7z") -C $nativeDir }
+if ($LASTEXITCODE -ne 0) { throw "Instale 7-Zip para extrair ImageMagick." }
+Expand-Archive -Force (Join-Path $downloadDir "ffmpeg-8.1.2-win64.zip") (Join-Path $downloadDir "ffmpeg-unpacked")
+$ffmpeg = Join-Path $downloadDir "ffmpeg-unpacked/ffmpeg-8.1.2-essentials_build"
+Copy-Item -Force (Join-Path $ffmpeg "bin/ffmpeg.exe"), (Join-Path $ffmpeg "bin/ffprobe.exe") $nativeDir
+New-Item -ItemType Directory -Force (Join-Path $nativeDir "licenses/ffmpeg") | Out-Null
+Copy-Item -Force (Join-Path $ffmpeg "LICENSE"), (Join-Path $ffmpeg "README.txt") (Join-Path $nativeDir "licenses/ffmpeg")
+# CPU facial runtime, pinned to the same official npm distribution used in this build.
+$faceDir = Join-Path $nativeDir "faces"
+New-Item -ItemType Directory -Force $faceDir | Out-Null
+$faceDll = Join-Path $faceDir "onnxruntime.dll"
+if (!(Test-Path $faceDll)) {
+    $onnxArchive = Join-Path $downloadDir "onnxruntime-node-1.27.0.tgz"
+    if (!(Test-Path $onnxArchive)) { Invoke-WebRequest "https://registry.npmjs.org/onnxruntime-node/-/onnxruntime-node-1.27.0.tgz" -OutFile $onnxArchive }
+    $sha = [Security.Cryptography.SHA512]::Create()
+    $stream = [IO.File]::OpenRead($onnxArchive)
+    try { $integrity = [Convert]::ToBase64String($sha.ComputeHash($stream)) } finally { $stream.Dispose(); $sha.Dispose() }
+    if ($integrity -ne "QEzGwrvNBgv4uPVdnbHsOGG4G6T96mdlcFI8aAKPjMU8wOPpVocPXb6k3QGkaZagVTv2G9Bnnbo6Z3JdXr1fQw==") { throw "Integridade do runtime ONNX não confere." }
+    $onnxUnpacked = Join-Path $downloadDir "onnx-unpacked"
+    New-Item -ItemType Directory -Force $onnxUnpacked | Out-Null
+    & tar -xf $onnxArchive -C $onnxUnpacked
+    if ($LASTEXITCODE -ne 0) { throw "Falha ao extrair ONNX Runtime." }
+    Copy-Item (Join-Path $onnxUnpacked "package/bin/napi-v6/win32/x64/onnxruntime.dll") $faceDll
+}
+if ((Get-FileHash $faceDll -Algorithm SHA256).Hash.ToLowerInvariant() -ne "273f9ef9cf755c6a0f342226a80448156c10ceb74db2ae8c8370dc98e75af0eb") { throw "DLL ONNX diferente da versão fixada." }
+$faceLicenses = @{
+    "onnxruntime" = "https://raw.githubusercontent.com/microsoft/onnxruntime/main/LICENSE"
+    "yunet" = "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_detection_yunet/LICENSE"
+    "uniface" = "https://raw.githubusercontent.com/yakhyo/uniface/main/LICENSE"
+    "adaface" = "https://raw.githubusercontent.com/mk-minchul/AdaFace/master/LICENSE"
+    "adaface-export" = "https://raw.githubusercontent.com/yakhyo/adaface-onnx/main/LICENSE"
+    "edgeface" = "https://raw.githubusercontent.com/otroshi/edgeface/main/LICENSE"
+    "edgeface-export" = "https://raw.githubusercontent.com/yakhyo/edgeface-onnx/main/LICENSE"
+    "sface" = "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_recognition_sface/LICENSE"
+}
+foreach ($entry in $faceLicenses.GetEnumerator()) {
+    $licenseFile = Join-Path $faceDir "$($entry.Key)-LICENSE.txt"
+    if (!(Test-Path $licenseFile)) { Invoke-WebRequest $entry.Value -OutFile $licenseFile }
+}
+if ($WithSscd) {
+    $sscdDir = Join-Path $nativeDir "sscd"
+    New-Item -ItemType Directory -Force $sscdDir | Out-Null
+    python scripts/export-sscd.py --output $sscdDir
+    if ($LASTEXITCODE -ne 0) { throw "Exportação/paridade SSCD falhou; o modelo não pode ser empacotado." }
+    Invoke-WebRequest "https://raw.githubusercontent.com/facebookresearch/sscd-copy-detection/main/LICENSE" -OutFile (Join-Path $sscdDir "LICENSE.txt")
+}
+$outputPath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot $Output))
+$artifactsRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot "artifacts"))
+if (!$outputPath.StartsWith($artifactsRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw "Output deve ficar dentro de artifacts." }
+$stage = Join-Path $artifactsRoot ("publish-" + [guid]::NewGuid().ToString("N"))
+try {
+    dotnet publish src/GuiaFotos.Windows/GuiaFotos.Windows.csproj -c Release -r win-x64 --self-contained true -o $stage
+    if ($LASTEXITCODE -ne 0) { throw "Compilação falhou." }
+    $stageTools = Join-Path $stage "tools"
+    New-Item -ItemType Directory -Force $stageTools | Out-Null
+    Get-ChildItem $nativeDir | Where-Object { $WithSscd -or $_.Name -ne "sscd" } | Copy-Item -Recurse -Force -Destination $stageTools
+    Copy-Item INSTRUCOES.txt, LICENSE.txt, THIRD-PARTY.txt, LEIA-ME-PACOTES.txt, REVISAO-SENTINELA.txt $stage
+    # NuGet runtime packs contain notices that dotnet publish does not always copy.
+    $packageRoot = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE ".nuget/packages" }
+    $runtimeNotices = @{
+        "core" = "microsoft.netcore.app.runtime.win-x64"
+        "desktop" = "microsoft.windowsdesktop.app.runtime.win-x64"
+    }
+    $licenseOutput = Join-Path $stage "licenses/dotnet"
+    New-Item -ItemType Directory -Force $licenseOutput | Out-Null
+    foreach ($entry in $runtimeNotices.GetEnumerator()) {
+        $pack = Get-ChildItem (Join-Path $packageRoot $entry.Value) -Directory | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+        if (!$pack) { throw "Runtime pack ausente: $($entry.Value)" }
+        foreach ($notice in @("LICENSE.txt", "THIRD-PARTY-NOTICES.txt")) {
+            $noticeFile = Get-ChildItem $pack.FullName -File | Where-Object {
+                $_.Name -ieq $notice -or ($notice -eq "LICENSE.txt" -and $_.Name -ieq "LICENSE")
+            } | Select-Object -First 1
+            if ($noticeFile) { Copy-Item $noticeFile.FullName (Join-Path $licenseOutput "$($entry.Key)-$notice") }
+            elseif ($notice -eq "LICENSE.txt") { throw "Licença não encontrada: $($entry.Value)" }
+        }
+    }
+    $manifest = Join-Path $stage "SHA256SUMS.txt"
+    Get-ChildItem -Recurse -File $stage | Where-Object { $_.FullName -ne $manifest } | Sort-Object FullName | ForEach-Object {
+        "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant())  $($_.FullName.Substring($stage.Length + 1).Replace('\', '/'))"
+    } | Set-Content -Encoding UTF8 $manifest
+    if (Test-Path $outputPath) { Remove-Item -Recurse -Force $outputPath }
+    Move-Item $stage $outputPath
+} finally { if (Test-Path $stage) { Remove-Item -Recurse -Force $stage } }
+Write-Output "Publicação pronta: $outputPath/GuiaFotos.exe"
+if (!$SkipPackages) {
+    dotnet publish installer/GuiaFotos.Setup.csproj -c Release -r win-x64 --self-contained true -o artifacts/setup-stub
+    if ($LASTEXITCODE -ne 0) { throw "Compilação do instalador falhou." }
+    python package-windows.py --publish $outputPath
+    if ($LASTEXITCODE -ne 0) { throw "Empacotamento falhou. Instale Python 3.11 ou superior." }
+}

@@ -1,0 +1,9 @@
+{
+  "MaximumFalsePositiveRate": 0.01,
+  "Pairs": [
+    { "Reference": "calibration/ana-1.jpg", "Candidate": "calibration/ana-2.jpg", "SamePerson": true, "Split": "calibration" },
+    { "Reference": "calibration/ana-1.jpg", "Candidate": "calibration/bruno-1.jpg", "SamePerson": false, "Split": "calibration" },
+    { "Reference": "evaluation/ana-3.jpg", "Candidate": "evaluation/ana-4.jpg", "SamePerson": true, "Split": "evaluation" },
+    { "Reference": "evaluation/ana-3.jpg", "Candidate": "evaluation/bruno-2.jpg", "SamePerson": false, "Split": "evaluation" }
+  ]
+}

@@ -1,0 +1,21 @@
+GuiaFotos 0.2.0 — revisão para pré-validação — 14/10/2026
+
+Revisão independente de código e integridade dos pacotes concluída.
+Não equivale a homologação de funcionamento ou precisão.
+
+EVIDÊNCIAS LOCAIS
+- Compilação cruzada Windows x64 concluída em Linux ARM64.
+- 13 testes de agrupamento e 16 testes avançados passaram.
+- Índice vetorial comparado com força bruta; persistência, cancelamento,
+  correções de pessoas e famílias de fotos exercitados.
+- Variantes JPEG/WebP, brilho, resolução e orientação foram testadas com
+  imagens geradas. A inferência ONNX local usa um grafo Identity sintético.
+- Manifestos, hashes e inventários dos pacotes 0.2.0 conferidos.
+
+PENDÊNCIAS
+- Executar interface, ferramentas, DPAPI e instalação no Windows real.
+- Medir a precisão dos cinco reconhecedores e SCRFD com fotos rotuladas.
+- Validar Nextcloud de produção e integrações externas reais.
+- Executar a exportação/paridade SSCD; o modelo não está no pacote local.
+
+Testes sintéticos não comprovam precisão em coleções de fotografias.

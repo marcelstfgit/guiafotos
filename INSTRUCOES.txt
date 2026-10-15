@@ -1,0 +1,76 @@
+GuiaFotos 0.2.0 — Windows 10/11 x64
+
+Há duas entregas: instalador Setup.exe e ZIP portátil. Consulte
+LEIA-ME-PACOTES.txt para instalar, desinstalar e atualizar sem perder dados.
+A aba Pessoas permite agrupar, nomear, unir/separar pessoas e buscar fotos.
+A aba Versões de fotos reúne cópias com brilho, compressão ou resolução alterados.
+Requer modelos baixados na ativação e Visual C++ x64; consulte LEIA-ME-PACOTES.txt.
+
+Abrir: extraia o ZIP inteiro e execute GuiaFotos.exe. Mantenha a pasta tools
+junto ao executável. O pacote inclui o runtime .NET; não precisa instalar
+Java, Python ou .NET para usar. Não é necessário executar como administrador.
+
+Código modificável: src/GuiaFotos.Core e src/GuiaFotos.Windows.
+Compilar: instale .NET SDK 8, Python 3.11+ e 7-Zip; no PowerShell execute:
+  powershell -ExecutionPolicy Bypass -File .\build-windows.ps1
+Testar no Windows:
+  $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
+  dotnet run --project tests/GuiaFotos.Tests -c Release
+  .\artifacts\windows-x64\GuiaFotos.exe --smoke-test
+
+Adicionar arquivos: Adicionar pasta, ou arraste uma pasta/arquivo para a janela.
+A biblioteca é ordenada pela captura EXIF, depois por data de modificação,
+do mais recente para o mais antigo. Renomear cria uma prévia separada:
+000001_YYYY-MM-DD_HH-mm-ss.ext para o mais recente, sem sobrescrever colisões.
+
+Duplicatas: tamanho + amostras de 16 KB com xxHash64 para candidatos;
+confirmação por comparação completa de bytes, sem SHA-256. pHash + dHash para fotos
+semelhantes e três quadros + duração para sugestões de vídeos recodificados.
+Semelhança é heurística; confirme visualmente antes de mover arquivos.
+
+Editor: Estou com sorte, restaurar ruído/contraste, rotação e recorte.
+Veja a prévia e use Salvar/exportar. Originais não são sobrescritos.
+O editor de metadados mostra os grupos lidos pelo ExifTool e permite editar
+campos graváveis em cópia. Campos técnicos podem ser somente leitura.
+Remover EXIF e Remover dados pessoais são funções locais, independentes da IA.
+Orientação é normalizada somente em formatos raster suportados; animações,
+RAW e multipágina não são achatados silenciosamente. Formatos que não permitem
+remover os campos solicitados com segurança são recusados, preservando o original.
+
+Nextcloud: informe URL HTTPS, usuário e senha de aplicativo nas Configurações.
+Backup cria snapshots independentes; cada arquivo é enviado para um nome
+temporário, relido/verificado com SHA-256 e promovido sem sobrescrever.
+Somente snapshots com manifesto válido são oferecidos como completos.
+É possível fazer upload/download avulso, restaurar backup e itens da lixeira
+Nextcloud. Recuperação física de setores apagados não é implementada nem
+garantida. A lixeira local do GuiaFotos, a lixeira do Windows e backups são
+os caminhos disponíveis. Restauração visual não recria detalhes perdidos.
+
+IA opcional: OpenAI Responses ou Claude Messages por chave de API protegida
+no DPAPI do Windows. Continue with ChatGPT usa o fluxo OAuth/PKCE oficial
+para aplicações abertas e requer autorização de uso do plano na conta.
+Login por device code não é simulado; o fluxo implementado abre o navegador.
+Selecione até 100 itens, confira o que será enviado e revise o plano.
+Somente nome/data/tipo/etiquetas/avaliação e sua instrução são enviados;
+os pixels e arquivos não são enviados. O uso da API pode ser cobrado.
+As ações encadeadas usam a cópia produzida pela etapa anterior. Antes de
+executar, o plano é validado; falhas posteriores ficam registradas como
+parciais, com as cópias concluídas e o histórico preservados.
+
+Dados locais na versão instalada: %LOCALAPPDATA%\GuiaFotos.
+No ZIP portátil, portable.marker ativa a pasta Data junto ao EXE.
+Essas pastas guardam catálogo, previews, lixeira e journal.
+As credenciais são criptografadas para o usuário Windows pelo DPAPI.
+Uma operação interrompida é reconciliada na inicialização; conflitos são
+exibidos para revisão. Álbuns, etiquetas, avaliações, favoritos e busca ficam
+no catálogo local; editar o catálogo não altera metadados do arquivo original.
+
+GuiaFotos é um projeto independente inspirado na organização local de fotos
+do Picasa. A importação de álbuns/Picasa.ini e a migração de seu banco de dados
+ainda não estão implementadas.
+
+Validação nesta entrega: compilação cruzada Windows x64 e testes do núcleo
+em Linux ARM64. Executar GUI, DPAPI e as ferramentas Windows no Windows real
+ainda requer o smoke test/workflow incluído. APIs com credenciais reais e
+Nextcloud de produção dependem da conta do usuário; os testes de protocolo
+usam servidor HTTP local e respostas controladas, sem custos de API.
