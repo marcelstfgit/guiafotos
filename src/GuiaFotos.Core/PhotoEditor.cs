@@ -54,8 +54,8 @@ public sealed class PhotoEditor(ToolPaths tools, MediaLibrary library, FileActio
                 await Tools.Run(tools.Magick, [source, "-auto-orient", "-quality", "95", extension.TrimStart('.') + ":" + temp], token);
             }
             else await FileActions.CopyVerified(source, temp, token);
-            var arguments = allPrivate ? new[] { "-overwrite_original", "-all=", "-tagsFromFile", "@", "-ICC_Profile", "--", temp }
-                : new[] { "-overwrite_original", "-EXIF:all=", "--", temp };
+            var arguments = allPrivate ? new[] { "-overwrite_original", "-charset", "filename=UTF8", "-all=", "-tagsFromFile", "@", "-ICC_Profile", "--", temp }
+                : new[] { "-overwrite_original", "-charset", "filename=UTF8", "-EXIF:all=", "--", temp };
             await Tools.Run(tools.ExifTool, arguments, token);
             var after = await library.Metadata(temp, token);
             if (after.Keys.Any(k => k.StartsWith("ExifIFD:") || k.StartsWith("IFD0:") || k.StartsWith("GPS:")))
