@@ -144,6 +144,21 @@ public sealed class PhotoGrid : UserControl
         return null;
     }
     public int RealizedRows => Enumerable.Range(0, rows.Items.Count).Count(i => rows.ItemContainerGenerator.ContainerFromIndex(i) != null);
+    internal bool IsPhotoVisible(string path)
+    {
+        return FindTile(rows);
+        bool FindTile(DependencyObject parent)
+        {
+            if (parent is PhotoTile tile && tile.DataContext is Tile data && Same(data.Item.Path, path))
+            {
+                var bounds = tile.TransformToAncestor(this).TransformBounds(new Rect(tile.RenderSize));
+                return tile.IsVisible && tile.HasImage && bounds.IntersectsWith(new Rect(RenderSize));
+            }
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+                if (FindTile(VisualTreeHelper.GetChild(parent, i))) return true;
+            return false;
+        }
+    }
     public sealed class SelectionCollection : ObservableCollection<MediaItem>
     {
         public void Replace(IEnumerable<MediaItem> source) { var copy = source.ToArray(); Items.Clear(); foreach (var p in copy) Items.Add(p); OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count))); OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); }
@@ -188,6 +203,7 @@ public sealed class PhotoGrid : UserControl
         private readonly Image image = new() { Stretch = Stretch.Uniform, SnapsToDevicePixels = true };
         private readonly TextBlock name = new() { TextAlignment = TextAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(1, 5, 1, 0), Foreground = new SolidColorBrush(Color.FromRgb(68, 72, 78)) };
         private Tile? tile;
+        internal bool HasImage => image.Source != null && image.ActualWidth > 0 && image.ActualHeight > 0;
         public PhotoTile()
         {
             Margin = new Thickness(7, 3, 9, 7); Padding = new Thickness(4); BorderThickness = new Thickness(2); Cursor = Cursors.Hand; CornerRadius = new CornerRadius(2);

@@ -4,7 +4,7 @@
 
 Organizador de fotos para Windows, inspirado na praticidade do Picasa, com foco em encontrar pessoas e reunir versões da mesma fotografia.
 
-**Projeto em desenvolvimento · 0.2.0 de pré-validação.**
+**Projeto em desenvolvimento · 0.2.1 de pré-validação.**
 
 [Downloads no GitHub Releases](https://github.com/marcelstfgit/guiafotos/releases) · instalador e portátil para Windows x64.
 
@@ -19,7 +19,8 @@ Em 2016, o Google [anunciou o encerramento do Picasa para concentrar seus esfor�
 - **Pessoas:** cinco motores de reconhecimento selecionáveis, SCRFD/YuNet, busca de rostos pequenos e agrupamento com nomes, união, separação e desfazer.
 - **Versões de fotos:** comparação de iluminação, compressão e resolução, visualização lado a lado e escolha da cópia preferida.
 - **Duplicatas:** filtro rápido por tamanho e amostras de 16 KB com xxHash64; confirmação dos candidatos por comparação completa de bytes.
-- **Biblioteca local:** álbuns, etiquetas, avaliações, favoritos, metadados e edição com exportação em cópias.
+- **Biblioteca local:** pastas e álbuns na lateral, grade de miniaturas com zoom, pesquisa e seleção múltipla.
+- **Editor integrado:** duplo clique para abrir, foto ampliada, navegação, recorte visual, luz/cor, desfazer/refazer e exportação em cópia.
 - **Nextcloud:** snapshots de backup e restauração com verificação de integridade.
 - **Distribuição:** scripts para gerar instalador `.exe` e versão portátil para Windows x64.
 

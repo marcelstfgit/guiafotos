@@ -1,14 +1,17 @@
-GuiaFotos 0.2.0 — revisão para pré-validação — 15/10/2026
+GuiaFotos 0.2.1 — revisão para pré-validação — 15/10/2026
 
 Revisão independente do código e dos critérios de publicação.
 Não equivale a homologação de toda a interface ou da precisão facial.
 
 EVIDÊNCIA POR PACOTE
-- Após validação no CI, GuiaFotos-0.2.0-validacao-pacotes.json identifica
+- Após validação no CI, GuiaFotos-0.2.1-validacao-pacotes.json identifica
   o commit e os testes concluídos; confira os arquivos com SHA256SUMS.
 - A Release exige as suítes de núcleo, modelos, agrupamento, instalador,
   inicialização WPF e instalação/desinstalação/portátil sem falhas ou skips.
 - A evidência Windows cobre integração automatizada e smoke tests.
+- interface.zip inclui capturas WPF e o fluxo automatizado de importar,
+  selecionar, editar, desfazer/refazer, exportar e voltar. Não valida todos
+  os gestos de mouse/teclado; a captura 144 dpi não testa DPI do monitor.
 - O corpus visual usa imagens geradas e transformadas. Paridade SSCD
   e inferência com pesos treinados não medem precisão em uma coleção.
 

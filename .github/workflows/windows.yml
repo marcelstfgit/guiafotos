@@ -115,6 +115,7 @@ jobs:
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
+          ./scripts/prepare-ui-desktop.ps1
           $env:GUIAFOTOS_SMOKE_LOG = Join-Path (Resolve-Path artifacts).Path 'ui-review-error.log'
           $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--ui-review artifacts/ui-review tests/ui-sample-photos.json' -PassThru
           if (!$process.WaitForExit(240000)) { $process.Kill(); throw 'Desktop UI review timed out' }
@@ -123,6 +124,7 @@ jobs:
             Write-Host "::error::$details"
             throw 'Desktop UI review failed'
           }
+          if (!(Test-Path artifacts/ui-review/validacao-interface.json)) { throw 'Desktop flow did not produce its completion report' }
       - uses: actions/checkout@v4
         if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.package.outcome == 'success' }}
         with:
@@ -170,12 +172,13 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           path: |
-            artifacts/GuiaFotos-0.2.0-Setup.exe
-            artifacts/GuiaFotos-0.2.0-portatil-windows-x64.zip
-            artifacts/GuiaFotos-0.2.0-fonte.zip
-            artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip
-            artifacts/GuiaFotos-0.2.0-SHA256SUMS.txt
-            artifacts/GuiaFotos-0.2.0-validacao-pacotes.json
+            artifacts/GuiaFotos-0.2.1-Setup.exe
+            artifacts/GuiaFotos-0.2.1-portatil-windows-x64.zip
+            artifacts/GuiaFotos-0.2.1-fonte.zip
+            artifacts/GuiaFotos-0.2.1-fontes-dependencias.zip
+            artifacts/GuiaFotos-0.2.1-interface.zip
+            artifacts/GuiaFotos-0.2.1-SHA256SUMS.txt
+            artifacts/GuiaFotos-0.2.1-validacao-pacotes.json
             artifacts/ImageMagick-7.1.2-33-Windows.7z
   release:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -205,6 +208,7 @@ jobs:
           artifacts/GuiaFotos-*-portatil-windows-x64.zip
           artifacts/GuiaFotos-*-fonte.zip
           artifacts/GuiaFotos-*-fontes-dependencias.zip
+          artifacts/GuiaFotos-*-interface.zip
           artifacts/GuiaFotos-*-SHA256SUMS.txt
           artifacts/GuiaFotos-*-validacao-pacotes.json
           artifacts/ImageMagick-7.1.2-33-Windows.7z

@@ -10,6 +10,7 @@ public partial class App : Application
         MainWindow? window = null;
         try
         {
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
             if (review) Environment.SetEnvironmentVariable("GUIAFOTOS_UI_REVIEW_ROOT", System.IO.Path.Combine(System.IO.Path.GetTempPath(), "guiafotos-ui-review-" + Guid.NewGuid().ToString("N")));
             base.OnStartup(e);
             window = new MainWindow(true); window.Show();

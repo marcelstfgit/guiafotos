@@ -59,9 +59,10 @@ public partial class MainWindow : Window
     }
     private bool Confirm(string text) => MessageBox.Show(this, text, "GuiaFotos — confirmar", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK;
     private void Info(string text) { if (reviewMode) { reviewNotes.Add(text); return; } MessageBox.Show(this, text, "GuiaFotos", MessageBoxButton.OK, MessageBoxImage.Information); }
+    private bool LibraryBusy => task != null || peopleView.Busy || versionsView.Busy;
     private async Task<bool> Run(Func<CancellationToken, Task> work)
     {
-        if (task != null || peopleView.Busy || versionsView.Busy) { Info("Aguarde a tarefa atual da biblioteca/Pessoas ou cancele-a na respectiva aba."); return false; }
+        if (LibraryBusy) { Info("Aguarde a tarefa atual da biblioteca/Pessoas ou cancele-a na respectiva tela."); return false; }
         task = new CancellationTokenSource(); Progress.Visibility = Visibility.Visible;
         try { await work(task.Token); Status.Text = "Tarefa concluída."; return true; }
         catch (OperationCanceledException) { Status.Text = "Tarefa cancelada; originais preservados."; return false; }
@@ -84,6 +85,7 @@ public partial class MainWindow : Window
         refreshing = false;
         Count.Text = $"{items.Count} itens · {items.Sum(x => x.Size) / 1048576d:F1} MB";
         if (updateNavigation) UpdateLibraryNavigation(); UpdateLibraryHeading(items); UpdateSelectionBar();
+        if (EditorScreen.Visibility == Visibility.Visible) UpdateFilmstrip();
     }
     private void ShowAll(object sender, RoutedEventArgs e) { activeFolder = null; activeAlbum = null; navigationUpdating = true; Folders.SelectedItem = Albums.SelectedItem = null; navigationUpdating = false; filter = "all"; Search.Text = ""; ShowPage(0); Refresh(); }
     private void ShowFavorites(object sender, RoutedEventArgs e) { filter = filter == "favorites" ? "all" : "favorites"; ShowPage(0); Refresh(); }
@@ -124,7 +126,7 @@ public partial class MainWindow : Window
     private async void Lucky(object sender, RoutedEventArgs e) => await PreviewEdit("enhance");
     private async void RestoreOld(object sender, RoutedEventArgs e) => await PreviewEdit("restore");
     private async void Rotate(object sender, RoutedEventArgs e) => await PreviewEdit("rotate", new() { ["degrees"] = "90" });
-    private async void Crop(object sender, RoutedEventArgs e) { if (CurrentPhoto is not { } item) return; if (EditorScreen.Visibility != Visibility.Visible) await OpenEditor(item); Preview.CropMode = true; CropActions.Visibility = Visibility.Visible; }
+    private async void Crop(object sender, RoutedEventArgs e) { if (CurrentPhoto is not { } item || LibraryBusy) return; if (EditorScreen.Visibility != Visibility.Visible && !await OpenEditor(item)) return; Preview.CropMode = true; CropActions.Visibility = Visibility.Visible; }
     private async void UndoPreview(object sender, RoutedEventArgs e) { if (undoEdits.Count == 0 || task != null) return; await Run(async token => { redoEdits.Push(previewFile); previewFile = undoEdits.Pop(); await LoadEditorImage(previewFile ?? Selected().Path, token); UpdateEditButtons(); }); }
     private async void ExportPreview(object sender, RoutedEventArgs e)
     {
@@ -147,7 +149,7 @@ public partial class MainWindow : Window
     { if (!Confirm(allPrivate ? "Criar cópias sem EXIF/GPS/XMP/IPTC e metadados pessoais de vídeo? Perfis de cor são preservados quando possível; formatos que não permitem a remoção segura serão recusados." : "Criar cópias sem EXIF dos itens selecionados? Os originais serão preservados.")) return;
         await Run(async token => { var items = Selection(); if (items.Count == 0) throw new InvalidOperationException("Selecione itens."); var results = new List<string>(); foreach (var item in items) { var output = await editor.StripExif(item.Path, ExportDirectory(item), allPrivate, token); catalog.Add(await library.Inspect(output, token)); results.Add(Path.GetFileName(output) + " — relatório: " + output + ".audit.json"); } Info("Cópias verificadas:\n" + string.Join('\n', results)); }); }
     private void SaveOrganize(object sender, RoutedEventArgs e)
-    { try { var item = Selected(); var updated = item with { Rating = Math.Max(0, Rating.SelectedIndex), Tags = TagsBox.Text, Album = AlbumBox.Text }; catalog.Add(updated); if (editorItem?.Path == item.Path) editorItem = updated; libraryDirty = true; Refresh(); } catch (Exception error) { Info(error.Message); } }
+    { if (LibraryBusy) { Status.Text = "Aguarde a tarefa atual antes de organizar as fotos."; return; } try { var item = Selected(); SaveCatalogItem(item with { Rating = Math.Max(0, Rating.SelectedIndex), Tags = TagsBox.Text, Album = AlbumBox.Text }); libraryDirty = true; Refresh(); } catch (Exception error) { Info(error.Message); } }
     private async void EditMetadata(object sender, RoutedEventArgs e)
     {
         await Run(async token => { var item = Selected(); var tags = await library.Metadata(item.Path, token); var dialog = new MetadataDialog(tags) { Owner = this };
@@ -163,7 +165,13 @@ public partial class MainWindow : Window
     { await Run(async token => { DuplicateList.ItemsSource = await Task.Run(() => library.VerifiedDuplicates(catalog, similar, token), token); Tabs.SelectedIndex = 1; }); }
     private void DuplicateSelected(object sender, SelectionChangedEventArgs e)
     { if (DuplicateList.SelectedItem is DuplicateGroup group) { activeFolder = activeAlbum = null; filter = "all"; Search.Text = ""; Refresh(); Gallery.SelectedItems.Clear(); foreach (var item in group.Items) Gallery.SelectedItems.Add(item); ShowPage(0); Status.Text = "Grupo selecionado na Biblioteca. Compare antes de mover arquivos à lixeira."; } }
-    private void RemapIndexes(string source, string destination) { peopleView.Remap(source, destination); versionsView.Remap(source, destination); }
+    private void RemapIndexes(string source, string destination)
+    {
+        peopleView.Remap(source, destination); versionsView.Remap(source, destination);
+        if (editorItem?.Path == source) editorItem = editorItem with { Path = destination };
+        if (previewSource?.Path == source) previewSource = previewSource with { Path = destination };
+        if (editSessions.Remove(source, out var session)) editSessions[destination] = session;
+    }
     private async void RenameByDate(object sender, RoutedEventArgs e)
     {
         var items = Selection(); if (items.Count == 0) { Info("Selecione os itens que deseja renomear."); return; }
@@ -173,7 +181,7 @@ public partial class MainWindow : Window
     }
     private async void TrashSelected(object sender, RoutedEventArgs e)
     { var items = Selection(); if (items.Count == 0) return; if (!Confirm($"Mover {items.Count} arquivos para a lixeira do GuiaFotos? Uma cópia verificada será guardada antes de remover os arquivos da pasta.")) return;
-        await Run(async token => { foreach (var item in items) { await actions.Quarantine(item.Path, token); catalog.Remove(item.Path); } }); }
+        await Run(async token => { foreach (var item in items) { await actions.Quarantine(item.Path, token); catalog.Remove(item.Path); editSessions.Remove(item.Path); if (editorItem?.Path == item.Path && EditorScreen.Visibility == Visibility.Visible) { BackToLibrary(sender, e); editSessions.Remove(item.Path); editorItem = null; } } }); }
     private void RefreshHistory(object sender, RoutedEventArgs e) { History.ItemsSource = actions.History(); if (actions.Warnings.Count > 0) Info(string.Join('\n', actions.Warnings)); }
     private async void RestoreHistory(object sender, RoutedEventArgs e)
     { if (History.SelectedItem is not FileOperation entry || !Confirm("Restaurar este arquivo? Se o caminho original estiver ocupado, será usado outro nome.")) return; await Run(async token => { var output = await actions.Restore(entry, token); if (entry.Type == "rename") RemapIndexes(entry.Destination, output); catalog.Remove(entry.Destination); catalog.Add(await library.Inspect(output, token)); History.ItemsSource = actions.History(); }); }

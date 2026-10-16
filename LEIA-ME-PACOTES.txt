@@ -1,6 +1,6 @@
-GuiaFotos 0.2.0 — Windows 10/11 x64 — instalador e portátil
+GuiaFotos 0.2.1 — Windows 10/11 x64 — instalador e portátil
 
-Instalador: abra GuiaFotos-0.2.0-Setup.exe e clique em Instalar.
+Instalador: abra GuiaFotos-0.2.1-Setup.exe e clique em Instalar.
 Instala por usuário em %LOCALAPPDATA%\Programs\GuiaFotos, com atalhos e
 desinstalação em Configurações > Aplicativos. O catálogo fica separado em
 %LOCALAPPDATA%\GuiaFotos e não é apagado na desinstalação. Para atualizar,
@@ -25,7 +25,7 @@ da atualização rápida, mas a confirmação por bytes detecta diferenças.
 Semelhança de fotos usa pHash + dHash; vídeos usam duração e três quadros.
 
 PESSOAS
-Na aba Pessoas, escolha Motor de reconhecimento e Analisar fotos da biblioteca.
+Em Pessoas, escolha Motor de reconhecimento e Analisar fotos da biblioteca.
 Há cinco motores selecionáveis; a escolha persiste ao fechar o aplicativo:
 - AdaFace IR101: perfil de qualidade, rede pesada, download ~249 MB.
 - AdaFace IR50: perfil intermediário da mesma família, download ~166 MB.
@@ -71,7 +71,7 @@ motor, sem modificar suas preferências automaticamente. Fotos em grupo/rostos p
 desfoque e aparência alterada podem não ser reconhecidos. Revise resultados.
 
 VERSÕES DE FOTOS
-Use Analisar / retomar biblioteca na aba Versões de fotos. A comparação local
+Use Analisar / retomar biblioteca em Fotos semelhantes. A comparação local
 normaliza luminância e verifica estrutura em duas resoluções para sugerir
 versões com brilho, compressão ou resolução diferentes. Não usa SHA-256 das
 fotos para essa busca. Cada foto concluída é salva; cancelar e abrir de novo
@@ -103,7 +103,7 @@ independentemente do filtro rápido de duplicatas. Não sobrescreve backups.
 
 VALIDAÇÃO
 Build de pré-validação sem assinatura digital. O arquivo
-GuiaFotos-0.2.0-validacao-pacotes.json registra, após validação no CI, o commit,
+GuiaFotos-0.2.1-validacao-pacotes.json registra, após validação no CI, o commit,
 a execução e as suítes Windows concluídas. windows_execution_tested e
 pretrained_face_inference_tested só são marcados após os testes exigidos.
 O escopo é integração automatizada e smoke tests; não é homologação de toda

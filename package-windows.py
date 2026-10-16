@@ -10,7 +10,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 MARKER = b"GUIAFOTOSZIP-V1!"
 
 
@@ -133,7 +133,7 @@ def main():
             digest = check.read(32).hex()
             if length != payload.stat().st_size or digest != sha256(payload) or check.read(16) != MARKER:
                 raise ValueError("Trailer inválido no instalador")
-        (stage / "portable.marker").write_text("GuiaFotos portable 0.2.0\n", encoding="utf-8")
+        (stage / "portable.marker").write_text(f"GuiaFotos portable {VERSION}\n", encoding="utf-8")
         manifest(stage)
         portable_manifest = verify(stage)
         portable = Path(temp) / f"GuiaFotos-{VERSION}-portatil-windows-x64.zip"
@@ -146,7 +146,7 @@ def main():
                 rel = path.relative_to(ROOT)
                 if not excluded.intersection(rel.parts) and not path.name.endswith((".secret", ".user")):
                     archive_file.write(path, "GuiaFotos/" + rel.as_posix())
-        dependency_zip = Path(temp) / dependency_name
+        dependency_zip = Path(temp) / f"GuiaFotos-{VERSION}-fontes-dependencias.zip"
         shutil.copy2(dependency_source, dependency_zip)
         imagemagick_archive = Path(temp) / imagemagick_source.name
         shutil.copy2(imagemagick_source, imagemagick_archive)

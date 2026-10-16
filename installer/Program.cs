@@ -10,7 +10,7 @@ namespace GuiaFotos.Setup;
 
 public static class Program
 {
-    public const string Version = "0.2.0";
+    public const string Version = "0.2.1";
     private const string RegistryPath = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\GuiaFotos";
     public static string InstallRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "GuiaFotos");
     private static string MenuRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "GuiaFotos");

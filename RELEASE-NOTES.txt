@@ -1,10 +1,11 @@
 Português (Brasil)
 
-GuiaFotos 0.2.0 — versão de pré-validação para Windows 10/11 x64.
-Organização local, agrupamento de rostos e versões de fotos, duplicatas,
-edição em cópia e backup Nextcloud. Contribuições de programação são bem-vindas.
+GuiaFotos 0.2.1 — versão de pré-validação para Windows 10/11 x64.
+Biblioteca redesenhada com pastas/álbuns, grade de fotos e barra de seleção.
+Editor ampliado com recorte visual, ajustes de luz/cor e desfazer/refazer.
+Preserva organização por pessoas, fotos semelhantes, duplicatas e Nextcloud.
 
-Instalação: baixe GuiaFotos-0.2.0-Setup.exe e execute.
+Instalação: baixe GuiaFotos-0.2.1-Setup.exe e execute.
 Portátil: extraia todo o ZIP e execute GuiaFotos.exe. Preserve a pasta Data ao atualizar.
 
 Publicação condicionada aos testes automatizados Windows de compilação,
@@ -12,15 +13,17 @@ núcleo, modelos, agrupamento, interface e instalação/desinstalação.
 Isso não mede a precisão facial em uma coleção representativa nem valida
 Nextcloud de produção. Os executáveis ainda não têm assinatura digital.
 O relatório anexo registra o commit e as verificações concluídas neste pacote.
+interface.zip contém as capturas reais WPF e o relatório do fluxo de edição.
 Os fontes do aplicativo, FFmpeg/x264/dav1d e ImageMagick/delegates estão nos anexos.
 
 English (US)
 
-GuiaFotos 0.2.0 — preview build for Windows 10/11 x64.
-Local organization, face and photo-version grouping, duplicate detection,
-editing copies, and Nextcloud backup. Programming contributions are welcome.
+GuiaFotos 0.2.1 — preview build for Windows 10/11 x64.
+Redesigned library with folders/albums, photo grid, and selection tray.
+Large integrated editor with visual cropping, light/color, and undo/redo.
+Retains people, similar photos, duplicate detection, and Nextcloud features.
 
-Install: download and run GuiaFotos-0.2.0-Setup.exe.
+Install: download and run GuiaFotos-0.2.1-Setup.exe.
 Portable: extract the entire ZIP and run GuiaFotos.exe. Keep Data when updating.
 
 Publication requires automated Windows build, core, model, grouping,
@@ -28,4 +31,5 @@ interface, installation, and uninstallation checks to pass.
 These checks do not establish accuracy on a representative photo collection
 or validate a production Nextcloud server. Executables are not digitally signed.
 The attached report records the commit and completed checks for this package.
+interface.zip contains real WPF screenshots and the automated editing flow report.
 Application, FFmpeg/x264/dav1d, and ImageMagick/delegate sources are attached.

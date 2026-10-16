@@ -1,9 +1,9 @@
-GuiaFotos 0.2.0 — Windows 10/11 x64
+GuiaFotos 0.2.1 — Windows 10/11 x64
 
 Há duas entregas: instalador Setup.exe e ZIP portátil. Consulte
 LEIA-ME-PACOTES.txt para instalar, desinstalar e atualizar sem perder dados.
-A aba Pessoas permite agrupar, nomear, unir/separar pessoas e buscar fotos.
-A aba Versões de fotos reúne cópias com brilho, compressão ou resolução alterados.
+Pessoas permite agrupar, nomear, unir/separar pessoas e buscar fotos.
+Fotos semelhantes reúne cópias com brilho, compressão ou resolução alterados.
 Requer modelos baixados na ativação e Visual C++ x64; consulte LEIA-ME-PACOTES.txt.
 
 Abrir: extraia o ZIP inteiro e execute GuiaFotos.exe. Mantenha a pasta tools
@@ -30,8 +30,13 @@ confirmação por comparação completa de bytes, sem SHA-256. pHash + dHash par
 semelhantes e três quadros + duração para sugestões de vídeos recodificados.
 Semelhança é heurística; confirme visualmente antes de mover arquivos.
 
-Editor: Estou com sorte, restaurar ruído/contraste, rotação e recorte.
-Veja a prévia e use Salvar/exportar. Originais não são sobrescritos.
+Biblioteca: navegue por pastas ou álbuns na lateral; pesquise dentro da seleção
+atual. Ctrl e Shift selecionam várias fotos. Ajuste as miniaturas na barra inferior.
+Dê duplo clique para abrir o editor. Use as setas para trocar de foto e
+Voltar à biblioteca para continuar na mesma pasta/álbum.
+Editor: Estou com sorte, restauração, rotação, luz/cor e recorte visual.
+Arraste sobre a imagem para recortar; aplique, desfaça ou refaça os ajustes.
+Salvar cópia editada exporta o resultado. Originais não são sobrescritos.
 O editor de metadados mostra os grupos lidos pelo ExifTool e permite editar
 campos graváveis em cópia. Campos técnicos podem ser somente leitura.
 Remover EXIF e Remover dados pessoais são funções locais, independentes da IA.
@@ -71,8 +76,11 @@ GuiaFotos é um projeto independente inspirado na organização local de fotos
 do Picasa. A importação de álbuns/Picasa.ini e a migração de seu banco de dados
 ainda não estão implementadas.
 
-Validação: consulte GuiaFotos-0.2.0-validacao-pacotes.json junto aos downloads
+Validação: consulte GuiaFotos-0.2.1-validacao-pacotes.json junto aos downloads
 para identificar o commit e os testes Windows concluídos naquele pacote.
-Smoke tests não comprovam precisão facial nem toda a interação da interface.
+O arquivo interface.zip inclui capturas reais WPF e o fluxo automatizado
+de importar, selecionar, editar, desfazer/refazer, exportar e voltar à biblioteca.
+A renderização em 144 dpi não é um teste de DPI do monitor. Esses testes
+não comprovam precisão facial nem toda a interação manual da interface.
 APIs com credenciais reais e Nextcloud de produção continuam sem validação;
 os testes de protocolo usam respostas controladas, sem custos de API.

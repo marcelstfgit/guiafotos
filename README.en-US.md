@@ -4,7 +4,7 @@
 
 A photo organizer for Windows, inspired by Picasa's simplicity, focused on finding people and grouping versions of the same photo.
 
-**Under development · 0.2.0 preview build.**
+**Under development · 0.2.1 preview build.**
 
 [Downloads on GitHub Releases](https://github.com/marcelstfgit/guiafotos/releases) · Windows x64 installer and portable package.
 
@@ -19,7 +19,8 @@ In 2016, Google [announced Picasa's retirement to focus on Google Photos](https:
 - **People:** five selectable recognition models, SCRFD/YuNet detection, small-face search, and grouping with names, merging, splitting, and undo.
 - **Photo versions:** comparison across lighting, compression, and resolution changes, side-by-side viewing, and preferred-copy selection.
 - **Duplicates:** fast filtering by file size and 16 KB samples using xxHash64; candidate matches are confirmed by a full byte comparison.
-- **Local library:** albums, tags, ratings, favorites, metadata, and editing that exports copies.
+- **Local library:** folder and album sidebar, thumbnail grid with zoom, search, and multiple selection.
+- **Integrated editor:** double-click to open, large photo view, navigation, visual cropping, light/color adjustments, undo/redo, and exported copies.
 - **Nextcloud:** backup snapshots and restoration with integrity checks.
 - **Distribution:** scripts to build an `.exe` installer and a portable version for Windows x64.
 

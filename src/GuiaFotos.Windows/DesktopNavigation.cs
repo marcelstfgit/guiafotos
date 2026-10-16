@@ -91,9 +91,10 @@ public partial class MainWindow
     { if (!navigationUpdating && Albums.SelectedItem is LibraryLocation album) { activeAlbum = album.Path; activeFolder = null; navigationUpdating = true; Folders.SelectedItem = null; navigationUpdating = false; ShowPage(0); Refresh(); } }
     private void CreateAlbum(object sender, RoutedEventArgs e)
     {
+        if (LibraryBusy) { Status.Text = "Aguarde a tarefa atual antes de organizar as fotos."; return; }
         var selection = Selection(); if (selection.Count == 0) { Status.Text = "Selecione as fotos que deseja reunir em um álbum."; return; }
         var name = InputDialog.Ask(this, "Novo álbum", "Nome do álbum"); if (string.IsNullOrWhiteSpace(name)) return;
-        foreach (var item in selection) catalog.Add(item with { Album = name.Trim() });
+        foreach (var item in selection) { SaveCatalogItem(item with { Album = name.Trim() }); if (editorItem?.Path == item.Path && EditorScreen.Visibility == Visibility.Visible) AlbumBox.Text = name.Trim(); }
         activeAlbum = name.Trim(); activeFolder = null; libraryDirty = true; Refresh();
     }
     private void ThumbnailZoomChanged(object sender, RoutedPropertyChangedEventArgs<double> e) { if (Gallery != null) Gallery.ThumbnailSize = e.NewValue; }
@@ -101,13 +102,15 @@ public partial class MainWindow
     private void SmallerThumbnails(object sender, RoutedEventArgs e) => ThumbnailZoom.Value -= 20;
     private void ToggleFileNames(object sender, RoutedEventArgs e) { Gallery.ShowNames = ShowFileNames.IsChecked; Gallery.RefreshNames(); }
     private void ToggleFavorite(object sender, RoutedEventArgs e)
-    { foreach (var item in Selection()) catalog.Add(item with { Rating = item.Rating > 0 ? 0 : 5 }); libraryDirty = true; Refresh(); }
+    { if (LibraryBusy) { Status.Text = "Aguarde a tarefa atual antes de organizar as fotos."; return; } foreach (var item in Selection()) { var updated = item with { Rating = item.Rating > 0 ? 0 : 5 }; SaveCatalogItem(updated); if (editorItem?.Path == item.Path && EditorScreen.Visibility == Visibility.Visible) Rating.SelectedIndex = updated.Rating; } libraryDirty = true; Refresh(); }
+    private void SaveCatalogItem(MediaItem item)
+    { catalog.Add(item); if (editorItem?.Path == item.Path) editorItem = item; if (previewSource?.Path == item.Path) previewSource = item; }
     private async void EditSelected(object sender, RoutedEventArgs e) { if (Gallery.SelectedItem is { } item) await OpenEditor(item); else Status.Text = "Selecione uma foto ou dê duplo clique em uma miniatura."; }
     private void SaveEditSession()
     { if (editorItem != null) editSessions[editorItem.Path] = new EditSession(previewFile, undoEdits.ToArray(), redoEdits.ToArray()); }
     private async Task<bool> OpenEditor(MediaItem item)
     {
-        if (task != null) { Status.Text = "Aguarde a tarefa atual antes de trocar a foto."; return false; }
+        if (LibraryBusy) { Status.Text = "Aguarde a tarefa atual antes de trocar a foto."; return false; }
         if (item.Kind == "Vídeo") { Gallery.Select(item); OpenOriginal(this, new RoutedEventArgs()); return false; }
         searchDelay.Stop(); SaveEditSession(); editorLoad?.Cancel(); editorLoad?.Dispose(); editorLoad = new(); var token = editorLoad.Token;
         editorItem = item; Gallery.Select(item); undoEdits.Clear(); redoEdits.Clear();
@@ -124,12 +127,21 @@ public partial class MainWindow
         Preview.OriginalWidth = Preview.OriginalHeight = 0;
         try { Preview.Source = LoadImage(item.Thumbnail); } catch { Preview.Source = null; }
         Preview.Focus();
-        filmstripUpdating = true; Filmstrip.ItemsSource = Gallery.Items; Filmstrip.SelectedItem = item; Filmstrip.ScrollIntoView(item); filmstripUpdating = false;
-        EditorPosition.Text = $"{Gallery.Items.ToList().FindIndex(p => p.Path == item.Path) + 1} / {Gallery.Items.Count}";
+        UpdateFilmstrip();
         UpdateEditButtons();
         try { await LoadEditorImage(previewFile ?? item.Path, token); Status.Text = "Foto aberta. As edições preservam o original."; return !token.IsCancellationRequested && editorItem?.Path == item.Path && Preview.OriginalWidth > 0; }
         catch (OperationCanceledException) { return false; }
         catch (Exception error) { Status.Text = "Não foi possível abrir a foto: " + error.Message; if (reviewMode) lastReviewError = error; return false; }
+    }
+    private void UpdateFilmstrip()
+    {
+        filmstripUpdating = true; Filmstrip.ItemsSource = Gallery.Items;
+        Filmstrip.SelectedItem = Gallery.Items.FirstOrDefault(p => p.Path == editorItem?.Path);
+        if (Filmstrip.SelectedItem != null) Filmstrip.ScrollIntoView(Filmstrip.SelectedItem);
+        filmstripUpdating = false;
+        var index = Gallery.Items.ToList().FindIndex(p => p.Path == editorItem?.Path);
+        EditorPosition.Text = index >= 0 ? $"{index + 1} / {Gallery.Items.Count}" : "Fora do filtro atual";
+        if (editorItem != null) SelectedName.Text = editorItem.Name;
     }
     private async Task LoadEditorImage(string path, CancellationToken token = default)
     {

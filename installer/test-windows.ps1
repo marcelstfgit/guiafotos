@@ -13,7 +13,7 @@ $portable = Join-Path $env:TEMP ("GuiaFotos-portable-test-" + [guid]::NewGuid().
 New-Item -ItemType Directory -Force $dataRoot | Out-Null
 Set-Content $sentinel "preservar catálogo"
 try {
-    Run-Checked (Resolve-Path "artifacts/GuiaFotos-0.2.0-Setup.exe").Path "--install-silent"
+    Run-Checked (Resolve-Path "artifacts/GuiaFotos-0.2.1-Setup.exe").Path "--install-silent"
     if (!(Test-Path (Join-Path $install "GuiaFotos.exe"))) { throw "EXE instalado ausente" }
     if (!(Test-Path "HKCU:/Software/Microsoft/Windows/CurrentVersion/Uninstall/GuiaFotos")) { throw "Registro de desinstalação ausente" }
     $menu = Join-Path ([Environment]::GetFolderPath("StartMenu")) "Programs/GuiaFotos"
@@ -31,7 +31,7 @@ try {
     if ((Test-Path (Join-Path $menu "GuiaFotos.lnk")) -or (Test-Path (Join-Path $menu "Desinstalar GuiaFotos.lnk"))) { throw "Atalhos não removidos" }
     Remove-Item $unknown
     if (!(Get-ChildItem $install -Force)) { Remove-Item $install }
-    Expand-Archive "artifacts/GuiaFotos-0.2.0-portatil-windows-x64.zip" $portable
+    Expand-Archive "artifacts/GuiaFotos-0.2.1-portatil-windows-x64.zip" $portable
     Run-Checked (Join-Path $portable "GuiaFotos/GuiaFotos.exe") "--smoke-test"
     if (!(Test-Path (Join-Path $portable "GuiaFotos/Data/catalog.sqlite"))) { throw "Portátil não criou catálogo em Data" }
     Write-Output "PASS instalação, atalhos/registro, app instalado, desinstalação e dados preservados; portátil inicia com Data local."

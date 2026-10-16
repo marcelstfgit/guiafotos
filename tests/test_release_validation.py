@@ -3,10 +3,13 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import struct
 import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
+import zlib
 
 SCRIPT = Path(__file__).resolve().parents[1] / 'scripts/record-windows-validation.py'
 spec = importlib.util.spec_from_file_location('release_validation', SCRIPT)
@@ -42,15 +45,51 @@ class ReleaseValidationTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validation.test_results(self.folder)
 
+    def ui_archive(self, commit='a' * 40):
+        images = []
+        png = b'\x89PNG\r\n\x1a\n'
+        def chunk(kind, data):
+            return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
+        png += chunk(b'IHDR', struct.pack('>IIBBBBB', 1366, 768, 8, 2, 0, 0, 0))
+        png += chunk(b'IDAT', zlib.compress((b'\0' + b'\0' * (1366 * 3)) * 768)) + chunk(b'IEND', b'')
+        path = self.folder / 'GuiaFotos-0.2.1-interface.zip'
+        with zipfile.ZipFile(path, 'w') as archive:
+            for name in sorted(validation.UI_IMAGES):
+                archive.writestr(name, png)
+                images.append({'file': name, 'pixels': [1366, 768], 'sha256': hashlib.sha256(png).hexdigest()})
+            archive.writestr('validacao-interface.json', json.dumps({'commit': commit, 'passed': 1, 'failed': 0, 'checks': ['fixture'], 'screenshots': images}))
+            archive.writestr('ui-sample-photos.json', '{}')
+            archive.writestr('LEIA-ME.txt', 'test fixture')
+        return path
+
+    def test_missing_failed_or_stale_ui_evidence_is_rejected(self):
+        path = self.ui_archive()
+        with zipfile.ZipFile(path) as archive:
+            self.assertEqual(validation.ui_evidence(archive.read, 'a' * 40)['failed'], 0)
+            with self.assertRaises(ValueError):
+                validation.ui_evidence(archive.read, 'b' * 40)
+            report = json.loads(archive.read('validacao-interface.json'))
+            def read(name):
+                return json.dumps(report).encode() if name == 'validacao-interface.json' else archive.read(name)
+            report['failed'] = 1
+            with self.assertRaises(ValueError): validation.ui_evidence(read, 'a' * 40)
+            report['failed'] = 0
+            report['screenshots'].pop()
+            with self.assertRaises(ValueError): validation.ui_evidence(read, 'a' * 40)
+            report['screenshots'].append({'file': 'recorte-1366.png', 'pixels': [1366, 768], 'sha256': '0' * 64})
+            with self.assertRaises(ValueError): validation.ui_evidence(read, 'a' * 40)
+
     def report(self):
         products = []
-        names = ['GuiaFotos-0.2.0-' + suffix for suffix in ('Setup.exe', 'portatil-windows-x64.zip', 'fonte.zip', 'fontes-dependencias.zip')]
+        names = ['GuiaFotos-0.2.1-' + suffix for suffix in ('Setup.exe', 'portatil-windows-x64.zip', 'fonte.zip', 'fontes-dependencias.zip')]
         names.append('ImageMagick-7.1.2-33-Windows.7z')
         for name in names:
             data = name.encode()
             (self.folder / name).write_bytes(data)
             products.append({'file': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()})
-        return {'version': '0.2.0', 'products': products}
+        path = self.ui_archive()
+        products.append({'file': path.name, 'bytes': path.stat().st_size, 'sha256': validation.digest(path)})
+        return {'version': '0.2.1', 'products': products}
 
     def test_corresponding_sources_and_unchanged_binaries_are_required(self):
         report = self.report()
@@ -65,15 +104,17 @@ class ReleaseValidationTests(unittest.TestCase):
 
     def test_release_requires_checks_for_the_exact_tag_and_commit(self):
         report = self.report()
-        report.update(windows_execution_tested=True, pretrained_face_inference_tested=True,
-                      validation_commit='a' * 40, windows_test_results=validation.test_results(self.folder))
-        report_path = self.folder / 'GuiaFotos-0.2.0-validacao-pacotes.json'
+        results = validation.test_results(self.folder)
+        results['desktop-ui'] = {'passed': 1, 'failed': 0}
+        report.update(windows_execution_tested=True, pretrained_face_inference_tested=True, desktop_ui_flow_tested=True,
+                      validation_commit='a' * 40, windows_test_results=results)
+        report_path = self.folder / 'GuiaFotos-0.2.1-validacao-pacotes.json'
         report_path.write_text(json.dumps(report))
         names = [p['file'] for p in report['products']] + [report_path.name]
-        (self.folder / 'GuiaFotos-0.2.0-SHA256SUMS.txt').write_text(''.join(
+        (self.folder / 'GuiaFotos-0.2.1-SHA256SUMS.txt').write_text(''.join(
             f'{validation.digest(self.folder / n)}  {n}\n' for n in names))
         env = os.environ.copy()
-        env.update(GITHUB_SHA='a' * 40, GITHUB_REF_NAME='v0.2.0')
+        env.update(GITHUB_SHA='a' * 40, GITHUB_REF_NAME='v0.2.1')
         def run():
             return subprocess.run([sys.executable, str(SCRIPT), '--artifacts', str(self.folder), '--verify-only'],
                                   env=env, capture_output=True).returncode
