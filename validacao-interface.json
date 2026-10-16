@@ -1,0 +1,137 @@
+{
+  "commit": "47147a3e9ce2359a952aaef09d80bd04086fb57e",
+  "scope": "real WPF rendering and automated desktop flow; screenshots still require human visual review",
+  "passed": 61,
+  "failed": 0,
+  "checks": [
+    "capture viewport biblioteca-vazia-1366: 1366x768 DIPs, requested 1366x768",
+    "sample photo 0 checksum",
+    "sample photo 1 checksum",
+    "sample photo 2 checksum",
+    "sample photo 3 checksum",
+    "sample photo 4 checksum",
+    "sample photo 5 checksum",
+    "sample photo 6 checksum",
+    "sample photo 7 checksum",
+    "import a folder into the real catalog and show 24 photos",
+    "photos occupy the main library area",
+    "photo row virtualization displays actual thumbnails",
+    "toggle selection keeps both photos",
+    "range selection follows visible photo order",
+    "zoom preserves photo selection",
+    "capture viewport biblioteca-1366: 1366x768 DIPs, requested 1366x768",
+    "capture viewport biblioteca-1920-150: 1280x720 DIPs, requested 1280x720",
+    "folder navigation is exact and excludes similarly named siblings",
+    "range selection recovers when filtering removed its anchor",
+    "search preserves folder context",
+    "album navigation filters the actual catalog",
+    "open the selected original in the integrated editor",
+    "capture viewport editor-1366: 1366x768 DIPs, requested 1366x768",
+    "editor has a large photo canvas",
+    "visual crop maps normalized bounds to exact original pixels",
+    "capture viewport recorte-1366: 1366x768 DIPs, requested 1366x768",
+    "apply visual crop creates a derivative with the selected pixel dimensions",
+    "undo restores original preview without changing original bytes",
+    "redo restores the cropped derivative",
+    "editor keeps photo identity after album change removes it from the library filter",
+    "editing continues after the photo moves out of the active album",
+    "mark favorite then save tags without losing either change",
+    "export edited copy through the application export flow",
+    "return from editor preserves library context",
+    "large collection creates visible photo rows without realizing the whole collection",
+    "scroll to the final thumbnail in a 12000-photo collection",
+    "original bytes preserved: Passeios/Foto 01.jpg",
+    "original bytes preserved: Passeios/Foto 02.jpg",
+    "original bytes preserved: Passeios/Foto 03.jpg",
+    "original bytes preserved: Passeios/Foto 04.jpg",
+    "original bytes preserved: Passeios/Foto 05.jpg",
+    "original bytes preserved: Passeios/Foto 06.jpg",
+    "original bytes preserved: Passeios/Foto 07.jpg",
+    "original bytes preserved: Passeios/Foto 08.jpg",
+    "original bytes preserved: Viagem/Foto 01.jpg",
+    "original bytes preserved: Viagem/Foto 02.jpg",
+    "original bytes preserved: Viagem/Foto 03.jpg",
+    "original bytes preserved: Viagem/Foto 04.jpg",
+    "original bytes preserved: Viagem/Foto 05.jpg",
+    "original bytes preserved: Viagem/Foto 06.jpg",
+    "original bytes preserved: Viagem/Foto 07.jpg",
+    "original bytes preserved: Viagem/Foto 08.jpg",
+    "original bytes preserved: Viagem extra/Foto 01.jpg",
+    "original bytes preserved: Viagem extra/Foto 02.jpg",
+    "original bytes preserved: Viagem extra/Foto 03.jpg",
+    "original bytes preserved: Viagem extra/Foto 04.jpg",
+    "original bytes preserved: Viagem extra/Foto 05.jpg",
+    "original bytes preserved: Viagem extra/Foto 06.jpg",
+    "original bytes preserved: Viagem extra/Foto 07.jpg",
+    "original bytes preserved: Viagem extra/Foto 08.jpg",
+    "no application operation failed during the UI flow"
+  ],
+  "screenshots": [
+    {
+      "file": "biblioteca-vazia-1366.png",
+      "sha256": "54605d4a55b1785303afddeb903ec05e589bfb1e7d68e842d3d86a9ff6c2cbf7",
+      "viewport_dips": [
+        1366,
+        768
+      ],
+      "render_dpi": 96,
+      "pixels": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "biblioteca-1366.png",
+      "sha256": "e35cf9827bc6dc3edfd3cb60b4e0f136524b8e2a435f58d13ebc861d921e7eea",
+      "viewport_dips": [
+        1366,
+        768
+      ],
+      "render_dpi": 96,
+      "pixels": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "biblioteca-1920-150.png",
+      "sha256": "d0ca3fed228c7a565246f79c29f36e0ad35c0439029ecd712e73c78202835de3",
+      "viewport_dips": [
+        1280,
+        720
+      ],
+      "render_dpi": 144,
+      "pixels": [
+        1920,
+        1080
+      ]
+    },
+    {
+      "file": "editor-1366.png",
+      "sha256": "a2ad3af56accc1b28dd632dff6cec2f074db419a50302480203815543b257bb5",
+      "viewport_dips": [
+        1366,
+        768
+      ],
+      "render_dpi": 96,
+      "pixels": [
+        1366,
+        768
+      ]
+    },
+    {
+      "file": "recorte-1366.png",
+      "sha256": "45a1cc91bcc0514b5da6ec9b9bdf5681b8c7a6381941a8c54868b6fef2c1149a",
+      "viewport_dips": [
+        1366,
+        768
+      ],
+      "render_dpi": 96,
+      "pixels": [
+        1366,
+        768
+      ]
+    }
+  ],
+  "sample_license": "https://unsplash.com/license"
+}
