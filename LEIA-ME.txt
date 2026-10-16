@@ -1,6 +1,3 @@
-GuiaFotos — capturas da interface em revisão.
-
-As imagens são geradas pelo aplicativo WPF no Windows com fotos de demonstração.
-Confira o commit e os resultados em validacao-interface.json.
-Fotos de demonstração: Unsplash, https://unsplash.com/license
-Este ramo contém somente evidências visuais de desenvolvimento.
+Capturas reais do aplicativo WPF no Windows com fotografias de demonstração Unsplash. Fontes e checksums: ui-sample-photos.json. Licença: https://unsplash.com/license
+A imagem 1920-150 é uma renderização de 1280x720 DIPs em 144 dpi; não é um teste do DPI do monitor. O fluxo automatizado não comprova precisão facial nem todos os gestos de mouse/teclado.
+Real WPF screenshots on Windows using Unsplash demo photographs. Sources and checksums: ui-sample-photos.json. The 1920-150 image is a 144 dpi rendering, not a monitor DPI test.

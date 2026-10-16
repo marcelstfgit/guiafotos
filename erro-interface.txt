@@ -1,5 +1,5 @@
-System.InvalidOperationException: UI review failed: capture viewport biblioteca-vazia-1366 has the requested WPF size
+System.InvalidOperationException: UI review failed: capture viewport biblioteca-1920-150: 1280x768 DIPs, requested 1280x720
    at GuiaFotos.Windows.MainWindow.<>c__DisplayClass159_1.<ReviewInterface>g__Check|0(Boolean condition, String name) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 27
-   at GuiaFotos.Windows.MainWindow.<>c__DisplayClass159_1.<<ReviewInterface>g__Capture|1>d.MoveNext() in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 33
+   at GuiaFotos.Windows.MainWindow.<>c__DisplayClass159_1.<<ReviewInterface>g__Capture|1>d.MoveNext() in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 36
 --- End of stack trace from previous location ---
-   at GuiaFotos.Windows.MainWindow.ReviewInterface(String output, String manifest) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 43
+   at GuiaFotos.Windows.MainWindow.ReviewInterface(String output, String manifest) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 84

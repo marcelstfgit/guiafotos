@@ -1,0 +1,39 @@
+{
+  "source": "Unsplash",
+  "license": "https://unsplash.com/license",
+  "purpose": "Photographs used only in the automated desktop UI review; not bundled with the application.",
+  "photos": [
+    {
+      "url": "https://images.unsplash.com/photo-1500534623283-312aade485b7?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "56dc2c40b6ab621d3b6eedae2fa05f9076eb7063fd07edd816a3f3760f3d5c2f"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "c4724085cbc7fd14a7de045e75c59693cfaf86f6fd1d9ad9e08c95f2e98f1316"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "2e1f5413f40262c0ea68eed160aa07086a27ac4f5669933aea010e7d485bb626"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1518837695005-2083093ee35b?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "7405b0190015fcdae1c5b35eaf5fdd88b07116932d2d140fc6bd52abd9832747"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "ff14edfd129bc3dfb87fde9969153a0188d47e3e91dd362ef6a872f73682c160"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "a3587100d8cbdefeef01a86a9ac4fed2d890c3411a95cb5e0a0805d303d785a2"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "4d4e30c09af32da52d4e90b01566f3ce7409112c0ec8294b89c8db5740a972a5"
+    },
+    {
+      "url": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?fm=jpg&w=1400&q=82&fit=max",
+      "sha256": "b97199b534a4a7c3857a80adf4b41301aaf6e905e272a046f4c7efb612cf9ec7"
+    }
+  ]
+}
