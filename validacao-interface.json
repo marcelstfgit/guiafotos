@@ -1,5 +1,5 @@
 {
-  "commit": "47147a3e9ce2359a952aaef09d80bd04086fb57e",
+  "commit": "5de61dedf0536add83609d2b9c72492fb4ae1069",
   "scope": "real WPF rendering and automated desktop flow; screenshots still require human visual review",
   "passed": 61,
   "failed": 0,
@@ -69,7 +69,7 @@
   "screenshots": [
     {
       "file": "biblioteca-vazia-1366.png",
-      "sha256": "54605d4a55b1785303afddeb903ec05e589bfb1e7d68e842d3d86a9ff6c2cbf7",
+      "sha256": "be1eb298b0f9ed7c9fc597ebafa09021fe61bb6cf17bd09340021cdf2c32c851",
       "viewport_dips": [
         1366,
         768
@@ -82,7 +82,7 @@
     },
     {
       "file": "biblioteca-1366.png",
-      "sha256": "e35cf9827bc6dc3edfd3cb60b4e0f136524b8e2a435f58d13ebc861d921e7eea",
+      "sha256": "0b3935201087f6d043a075147da38ef092c00baf17bba6311fae70efeab5a93d",
       "viewport_dips": [
         1366,
         768
@@ -95,7 +95,7 @@
     },
     {
       "file": "biblioteca-1920-150.png",
-      "sha256": "d0ca3fed228c7a565246f79c29f36e0ad35c0439029ecd712e73c78202835de3",
+      "sha256": "7486adc30c633cad5b6dd36eeab47b9965d71f6a4da776da2e1168d022138a13",
       "viewport_dips": [
         1280,
         720
@@ -108,7 +108,7 @@
     },
     {
       "file": "editor-1366.png",
-      "sha256": "a2ad3af56accc1b28dd632dff6cec2f074db419a50302480203815543b257bb5",
+      "sha256": "54340da828f228f12e981b386b25f0150a0dd549aff0039b65d94076d35a7491",
       "viewport_dips": [
         1366,
         768
@@ -121,7 +121,7 @@
     },
     {
       "file": "recorte-1366.png",
-      "sha256": "45a1cc91bcc0514b5da6ec9b9bdf5681b8c7a6381941a8c54868b6fef2c1149a",
+      "sha256": "24fa1bdce206b8ee3721b4750f0f7deb165d7936d701f367e738f50e9dfa08c8",
       "viewport_dips": [
         1366,
         768
