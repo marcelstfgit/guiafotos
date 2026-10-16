@@ -1,10 +1,11 @@
 {
-  "commit": "99cfbc69b3d385c68f10bb774d61640158a5ec77",
+  "commit": "d6ce97d8abe589e0c5137650883f23d607ec41db",
   "scope": "real WPF rendering and automated desktop flow; screenshots still require human visual review",
-  "passed": 62,
+  "passed": 63,
   "failed": 0,
   "checks": [
     "capture viewport biblioteca-vazia-1366: 1366x768 DIPs, requested 1366x768",
+    "empty library disables actions that require a photo",
     "sample photo 0 checksum",
     "sample photo 1 checksum",
     "sample photo 2 checksum",
@@ -70,7 +71,7 @@
   "screenshots": [
     {
       "file": "biblioteca-vazia-1366.png",
-      "sha256": "be1eb298b0f9ed7c9fc597ebafa09021fe61bb6cf17bd09340021cdf2c32c851",
+      "sha256": "5b8e2d920c758e074b6972e33797ce28eaf4c58aac9880abd5d7eba700130d61",
       "viewport_dips": [
         1366,
         768
@@ -109,7 +110,7 @@
     },
     {
       "file": "editor-1366.png",
-      "sha256": "04cde3497eff6c6a2774972517053cf554b186892abf073cc747cb192804d2ab",
+      "sha256": "f5f7121e6b3fe05bb30970d688333caa0279a3763699c83388bfce47d806a75b",
       "viewport_dips": [
         1366,
         768
@@ -122,7 +123,7 @@
     },
     {
       "file": "recorte-1366.png",
-      "sha256": "7f59ef2da1439a78eafbf5e22cd09586d397bb49c0c169487153ed62f6ec8bf8",
+      "sha256": "5360d75544ce36f90a5ca46b581831fa58a9351b6109a1692db05298e0e2b265",
       "viewport_dips": [
         1366,
         768
