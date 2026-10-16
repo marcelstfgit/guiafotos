@@ -21,6 +21,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Prepare CI desktop for photo review
+        shell: pwsh
+        run: |
+          try { ./scripts/prepare-ui-desktop.ps1 }
+          catch {
+            $message = ($_ | Out-String).Trim().Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Host "::error::$message"
+            exit 1
+          }
       - name: Release gate regression tests
         shell: pwsh
         run: python -m unittest discover -s tests -p test_release_validation.py
@@ -115,7 +124,6 @@ jobs:
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
-          ./scripts/prepare-ui-desktop.ps1
           $env:GUIAFOTOS_SMOKE_LOG = Join-Path (Resolve-Path artifacts).Path 'ui-review-error.log'
           $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--ui-review artifacts/ui-review tests/ui-sample-photos.json' -PassThru
           if (!$process.WaitForExit(240000)) { $process.Kill(); throw 'Desktop UI review timed out' }
