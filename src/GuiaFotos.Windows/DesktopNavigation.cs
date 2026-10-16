@@ -62,6 +62,12 @@ public partial class MainWindow
         if (SelectionCount == null) return;
         SelectionCount.Text = Gallery.SelectedItems.Count switch { 0 => "Nenhuma foto", 1 => "1 selecionada", var n => $"{n} selecionadas" };
         try { SelectionPreview.Source = Gallery.SelectedItem is { } item ? LoadImage(item.Thumbnail) : null; } catch { SelectionPreview.Source = null; }
+        SelectionThumbnails.ItemsSource = Gallery.SelectedItems.Take(4).ToArray();
+        SelectionThumbnails.Visibility = Gallery.SelectedItems.Count > 1 ? Visibility.Visible : Visibility.Collapsed;
+        SelectionPreview.Visibility = Gallery.SelectedItems.Count > 1 ? Visibility.Collapsed : Visibility.Visible;
+        EditAction.IsEnabled = !LibraryBusy && Gallery.SelectedItem?.Kind == "Foto";
+        RotateAction.IsEnabled = EditAction.IsEnabled && Gallery.SelectedItems.Count == 1;
+        FavoriteAction.IsEnabled = ExportAction.IsEnabled = !LibraryBusy && Gallery.SelectedItems.Count > 0;
     }
     private void ShowPage(int index)
     {

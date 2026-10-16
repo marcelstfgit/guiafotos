@@ -63,11 +63,11 @@ public partial class MainWindow : Window
     private async Task<bool> Run(Func<CancellationToken, Task> work)
     {
         if (LibraryBusy) { Info("Aguarde a tarefa atual da biblioteca/Pessoas ou cancele-a na respectiva tela."); return false; }
-        task = new CancellationTokenSource(); Progress.Visibility = Visibility.Visible;
+        task = new CancellationTokenSource(); Progress.Visibility = CancelTaskButton.Visibility = Visibility.Visible;
         try { await work(task.Token); Status.Text = "Tarefa concluída."; return true; }
         catch (OperationCanceledException) { Status.Text = "Tarefa cancelada; originais preservados."; return false; }
         catch (Exception error) { Status.Text = "Falha: " + error.Message; if (reviewMode) lastReviewError = error; else MessageBox.Show(this, error.Message, "GuiaFotos — operação não concluída", MessageBoxButton.OK, MessageBoxImage.Warning); return false; }
-        finally { task.Dispose(); task = null; Progress.Visibility = Visibility.Collapsed; libraryDirty = true; Refresh(); }
+        finally { task.Dispose(); task = null; Progress.Visibility = CancelTaskButton.Visibility = Visibility.Collapsed; libraryDirty = true; Refresh(); }
     }
     private IProgress<string> ProgressText() => new Progress<string>(text => Status.Text = text);
     private MediaItem? CurrentPhoto => EditorScreen.Visibility == Visibility.Visible ? editorItem : Gallery.SelectedItem;

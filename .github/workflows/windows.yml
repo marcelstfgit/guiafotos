@@ -9,6 +9,7 @@ permissions:
   contents: read
 jobs:
   windows:
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: windows-latest
     permissions:
       contents: write
@@ -183,7 +184,7 @@ jobs:
             artifacts/GuiaFotos-0.2.1-validacao-pacotes.json
             artifacts/ImageMagick-7.1.2-33-Windows.7z
   release:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: ${{ always() && !cancelled() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     needs: windows
     runs-on: ubuntu-latest
     permissions:
@@ -191,10 +192,23 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v4
+      - name: Select the completed Windows build for this exact commit
+        id: validated
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          build=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/windows.yml/runs?head_sha=$GITHUB_SHA&branch=main&event=push&status=success&per_page=20" --jq '.workflow_runs[] | select(.head_branch == "main" and .event == "push" and .status == "completed" and .conclusion == "success") | [.id, .head_sha] | @tsv' | awk -v sha="$GITHUB_SHA" '$2 == sha {print $1; exit}')
+          if [ -z "$build" ]; then
+            echo '::error::No successful Windows build exists on main for this tag commit. Complete validation and visual review before tagging.'
+            exit 1
+          fi
+          echo "run-id=$build" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
         with:
           name: GuiaFotos-windows-x64
           path: artifacts
+          run-id: ${{ steps.validated.outputs.run-id }}
+          github-token: ${{ github.token }}
       - name: Verify release artifacts and Windows evidence
         run: python3 scripts/record-windows-validation.py --verify-only
       - name: Publish preview release
