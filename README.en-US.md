@@ -31,7 +31,7 @@ Optional SSCD integration is prepared; the model is absent from the current loca
 
 ## Build
 
-On Windows, install .NET SDK 8, Python 3.11+, and 7-Zip. The first build needs an internet connection to download dependencies.
+On Windows, install .NET SDK 8, Python 3.11+, 7-Zip, and MSYS2 MINGW64. The first build needs internet access. Prepare FFmpeg with `bash scripts/build-ffmpeg.sh` in MSYS2, following [CONTRIBUTING.en-US.md](CONTRIBUTING.en-US.md), then run in PowerShell:
 
 ```powershell
 .\build-windows.ps1

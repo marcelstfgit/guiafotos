@@ -15,7 +15,14 @@ Priorities: validate the app on Windows, improve accuracy on real collections, a
 
 ## Development
 
-Use .NET SDK 8, Python 3.11+, and 7-Zip on Windows. Build with `./build-windows.ps1`; external dependencies are placed in `tools/windows/`.
+Use .NET SDK 8, Python 3.11+, 7-Zip, and MSYS2 MINGW64 on Windows. In the MINGW64 terminal, install the tools and build FFmpeg:
+
+```bash
+pacman -S --needed make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python
+bash scripts/build-ffmpeg.sh
+```
+
+Then run `./build-windows.ps1` in PowerShell. Tools are placed in `tools/windows/`; corresponding FFmpeg/x264 sources are generated in `artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip`.
 
 ```powershell
 $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path

@@ -31,7 +31,7 @@ A integração opcional com SSCD está preparada; o modelo não acompanha o paco
 
 ## Compilar
 
-No Windows, instale .NET SDK 8, Python 3.11+ e 7-Zip. A primeira compilação precisa de internet para baixar dependências.
+No Windows, instale .NET SDK 8, Python 3.11+, 7-Zip e MSYS2 MINGW64. A primeira compilação precisa de internet. Prepare FFmpeg com `bash scripts/build-ffmpeg.sh` no MSYS2, seguindo [CONTRIBUTING.md](CONTRIBUTING.md), e execute no PowerShell:
 
 ```powershell
 .\build-windows.ps1

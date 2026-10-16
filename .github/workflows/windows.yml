@@ -3,6 +3,7 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   windows:
     runs-on: windows-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -11,6 +12,35 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/cache/restore@v4
+        id: ffmpeg-cache
+        with:
+          key: windows-ffmpeg-${{ hashFiles('scripts/build-ffmpeg.sh') }}
+          path: |
+            tools/windows/ffmpeg.exe
+            tools/windows/ffprobe.exe
+            tools/windows/ffmpeg-build.json
+            tools/windows/licenses/ffmpeg
+            artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip
+      - uses: msys2/setup-msys2@v2
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        with:
+          msystem: MINGW64
+          install: make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python
+      - name: Build FFmpeg with corresponding sources
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        shell: msys2 {0}
+        run: bash scripts/build-ffmpeg.sh
+      - uses: actions/cache/save@v4
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        with:
+          key: windows-ffmpeg-${{ hashFiles('scripts/build-ffmpeg.sh') }}
+          path: |
+            tools/windows/ffmpeg.exe
+            tools/windows/ffprobe.exe
+            tools/windows/ffmpeg-build.json
+            tools/windows/licenses/ffmpeg
+            artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip
       - name: Install build-only SSCD export dependencies
         shell: pwsh
         run: |
@@ -33,8 +63,7 @@ jobs:
         shell: pwsh
         run: |
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
-          dotnet run --project tests/GuiaFotos.Tests -c Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/run-tests.ps1 -Project tests/GuiaFotos.Tests -Log artifacts/test-core.log
       - name: WPF launch smoke test
         shell: pwsh
         run: |
@@ -47,19 +76,16 @@ jobs:
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
           $env:GUIAFOTOS_ONNX_LIBRARY = (Resolve-Path artifacts/windows-x64/tools/faces/onnxruntime.dll).Path
           $env:GUIAFOTOS_TEST_PRETRAINED = '1'
-          dotnet run --project tests/GuiaFotos.AdvancedTests/GuiaFotos.AdvancedTests.csproj -c Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/run-tests.ps1 -Project tests/GuiaFotos.AdvancedTests/GuiaFotos.AdvancedTests.csproj -Log artifacts/test-advanced.log
       - name: Full grouping, persistent index, corrections and image variants
         shell: pwsh
         run: |
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
-          dotnet run --project tests/GuiaFotos.GroupingTests -c Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/run-tests.ps1 -Project tests/GuiaFotos.GroupingTests -Log artifacts/test-grouping.log
       - name: Installer integrity and removal path tests
         shell: pwsh
         run: |
-          dotnet run --project installer/tests/Setup.Tests.csproj -c Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./scripts/run-tests.ps1 -Project installer/tests/Setup.Tests.csproj -Log artifacts/test-installer.log
       - name: Install, launch, uninstall and portable smoke tests
         shell: pwsh
         run: ./installer/test-windows.ps1
@@ -70,5 +96,6 @@ jobs:
             artifacts/GuiaFotos-0.2.0-Setup.exe
             artifacts/GuiaFotos-0.2.0-portatil-windows-x64.zip
             artifacts/GuiaFotos-0.2.0-fonte.zip
+            artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip
             artifacts/GuiaFotos-0.2.0-SHA256SUMS.txt
             artifacts/GuiaFotos-0.2.0-validacao-pacotes.json

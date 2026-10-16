@@ -11,7 +11,9 @@ junto ao executável. O pacote inclui o runtime .NET; não precisa instalar
 Java, Python ou .NET para usar. Não é necessário executar como administrador.
 
 Código modificável: src/GuiaFotos.Core e src/GuiaFotos.Windows.
-Compilar: instale .NET SDK 8, Python 3.11+ e 7-Zip; no PowerShell execute:
+Compilar: instale .NET SDK 8, Python 3.11+, 7-Zip e MSYS2 MINGW64.
+Prepare FFmpeg com bash scripts/build-ffmpeg.sh (veja CONTRIBUTING.md).
+No PowerShell execute:
   powershell -ExecutionPolicy Bypass -File .\build-windows.ps1
 Testar no Windows:
   $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path

@@ -14,16 +14,15 @@ SHA256 do arquivo .7z oficial:
 Licenças/avisos de bibliotecas: tools/LICENSE.txt e tools/NOTICE.txt.
 Fonte: https://github.com/ImageMagick/ImageMagick/tree/7.1.2-33
 
-FFmpeg 8.1.2 essentials Windows x64 (Gyan):
-https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip
-SHA256: db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec
-Licença GPLv3 e configuração/origens: tools/licenses/ffmpeg/LICENSE e README.txt.
-Fonte correspondente FFmpeg: https://github.com/FFmpeg/FFmpeg/commit/38b88335f9
-O README da distribuição lista bibliotecas adicionais; a redistribuição pública
-de um pacote derivado deve respeitar também suas licenças e disponibilizar o
-código-fonte correspondente exigido. O pacote local não inclui o código-fonte
-de todos os codecs. Não publique como uma distribuição comercial final sem
-completar essa etapa de distribuição das dependências.
+FFmpeg para Windows x64: compilado por scripts/build-ffmpeg.sh com GPLv3,
+sem autodetecção de bibliotecas externas; somente x264 é ligado externamente.
+FFmpeg: https://github.com/FFmpeg/FFmpeg/commit/38b88335f9
+x264: https://github.com/mirror/x264/commit/31e19f92f00c7003fa115047ce50978bc98c3a0d
+Arquivos originais, script, configuração e versões do compilador acompanham
+a Release como GuiaFotos-0.2.0-fontes-dependencias.zip:
+https://github.com/marcelstfgit/guiafotos/releases/tag/v0.2.0
+Hashes dos binários e fontes: tools/ffmpeg-build.json.
+Licença e instruções: tools/licenses/ffmpeg/LICENSE e README.txt.
 
 .NET 8 Windows Desktop: Microsoft, licenças MIT e third-party notices presentes
 no runtime. SQLite e Microsoft.Data.Sqlite: domínio público/MIT.

@@ -24,8 +24,7 @@ function Get-VerifiedDownload([string]$Destination, [string[]]$Urls, [string]$Ha
 }
 $archives = @(
     @{ Name="exiftool-13.59_64.zip"; Urls=@("https://downloads.sourceforge.net/project/exiftool/exiftool-13.59_64.zip", "https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download"); Hash="44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec" },
-    @{ Name="imagemagick-7.1.2-33-x64.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"); Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" },
-    @{ Name="ffmpeg-8.1.2-win64.zip"; Urls=@("https://github.com/GyanD/codexffmpeg/releases/download/8.1.2/ffmpeg-8.1.2-essentials_build.zip", "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip"); Hash="db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec" }
+    @{ Name="imagemagick-7.1.2-33-x64.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"); Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" }
 )
 foreach ($archive in $archives) {
     $destination = Join-Path $downloadDir $archive.Name
@@ -39,11 +38,15 @@ if ($sevenZip) { & $sevenZip.Source x -y "-o$nativeDir" (Join-Path $downloadDir 
 elseif (Test-Path "C:/Program Files/7-Zip/7z.exe") { & "C:/Program Files/7-Zip/7z.exe" x -y "-o$nativeDir" (Join-Path $downloadDir "imagemagick-7.1.2-33-x64.7z") | Out-Null }
 else { & tar -xf (Join-Path $downloadDir "imagemagick-7.1.2-33-x64.7z") -C $nativeDir }
 if ($LASTEXITCODE -ne 0) { throw "Instale 7-Zip para extrair ImageMagick." }
-Expand-Archive -Force (Join-Path $downloadDir "ffmpeg-8.1.2-win64.zip") (Join-Path $downloadDir "ffmpeg-unpacked")
-$ffmpeg = Join-Path $downloadDir "ffmpeg-unpacked/ffmpeg-8.1.2-essentials_build"
-Copy-Item -Force (Join-Path $ffmpeg "bin/ffmpeg.exe"), (Join-Path $ffmpeg "bin/ffprobe.exe") $nativeDir
-New-Item -ItemType Directory -Force (Join-Path $nativeDir "licenses/ffmpeg") | Out-Null
-Copy-Item -Force (Join-Path $ffmpeg "LICENSE"), (Join-Path $ffmpeg "README.txt") (Join-Path $nativeDir "licenses/ffmpeg")
+$ffmpegManifest = Join-Path $nativeDir "ffmpeg-build.json"
+if (!(Test-Path $ffmpegManifest)) { throw "Compile FFmpeg primeiro: bash scripts/build-ffmpeg.sh em MSYS2 MINGW64. Consulte CONTRIBUTING.md." }
+$ffmpegBuild = Get-Content -Raw $ffmpegManifest | ConvertFrom-Json
+if ($ffmpegBuild.FfmpegCommit -ne "38b88335f9" -or $ffmpegBuild.X264Commit -ne "31e19f92f00c7003fa115047ce50978bc98c3a0d") { throw "Versões do FFmpeg/x264 diferentes das fontes fixadas." }
+foreach ($binary in $ffmpegBuild.Binaries.PSObject.Properties) {
+    if ((Get-FileHash (Join-Path $nativeDir $binary.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $binary.Value) { throw "FFmpeg adulterado: $($binary.Name)" }
+}
+$ffmpegSources = Join-Path $PSScriptRoot "artifacts/$($ffmpegBuild.SourceArchive)"
+if (!(Test-Path $ffmpegSources) -or (Get-FileHash $ffmpegSources -Algorithm SHA256).Hash.ToLowerInvariant() -ne $ffmpegBuild.SourceSha256) { throw "Fontes correspondentes do FFmpeg ausentes ou alterados." }
 # CPU facial runtime, pinned to the same official npm distribution used in this build.
 $faceDir = Join-Path $nativeDir "faces"
 New-Item -ItemType Directory -Force $faceDir | Out-Null

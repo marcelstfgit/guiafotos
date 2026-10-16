@@ -69,7 +69,7 @@ def main():
     required = ["GuiaFotos.exe", "GuiaFotos.dll", "GuiaFotos.runtimeconfig.json", "coreclr.dll",
                 "PresentationFramework.dll", "tools/exiftool.exe", "tools/exiftool_files/LICENSE",
                 "tools/ffmpeg.exe", "tools/ffprobe.exe", "tools/magick.exe",
-                "tools/LICENSE.txt", "tools/NOTICE.txt", "tools/licenses/ffmpeg/LICENSE",
+                "tools/LICENSE.txt", "tools/NOTICE.txt", "tools/licenses/ffmpeg/LICENSE", "tools/ffmpeg-build.json",
                 "licenses/dotnet/core-LICENSE.txt", "licenses/dotnet/desktop-LICENSE.txt", "tools/faces/onnxruntime.dll", "tools/faces/onnxruntime-LICENSE.txt", "tools/faces/yunet-LICENSE.txt", "tools/faces/sface-LICENSE.txt", "tools/faces/adaface-LICENSE.txt", "tools/faces/adaface-export-LICENSE.txt", "tools/faces/edgeface-LICENSE.txt", "tools/faces/edgeface-export-LICENSE.txt", "tools/faces/uniface-LICENSE.txt"]
     for name in required:
         if not (publish / name).is_file():
@@ -83,6 +83,19 @@ def main():
         raise ValueError("Stub do instalador não é um executável Windows")
     if (publish / "portable.marker").exists() or (publish / "Data").exists():
         raise ValueError("Não empacote um diretório portátil usado ou seus dados pessoais")
+    ffmpeg = json.loads((publish / "tools/ffmpeg-build.json").read_text())
+    if ffmpeg["FfmpegCommit"] != "38b88335f9" or ffmpeg["X264Commit"] != "31e19f92f00c7003fa115047ce50978bc98c3a0d":
+        raise ValueError("FFmpeg/x264 não correspondem às fontes fixadas")
+    dependency_name = "GuiaFotos-0.2.0-fontes-dependencias.zip"
+    dependency_source = ROOT / "artifacts" / dependency_name
+    if ffmpeg["SourceArchive"] != dependency_name or not dependency_source.is_file() or sha256(dependency_source) != ffmpeg["SourceSha256"]:
+        raise ValueError("Fontes correspondentes do FFmpeg ausentes ou alterados")
+    for name in ("ffmpeg.exe", "ffprobe.exe"):
+        if sha256(publish / "tools" / name) != ffmpeg["Binaries"][name]:
+            raise ValueError(f"Binário FFmpeg não corresponde ao manifesto: {name}")
+    with zipfile.ZipFile(dependency_source) as dependencies:
+        if dependencies.testzip():
+            raise ValueError("ZIP de fontes de dependências corrompido")
     sscd_dir = publish / "tools/sscd"
     sscd_included = (sscd_dir / "sscd-model.json").is_file()
     if sscd_included:
@@ -130,7 +143,9 @@ def main():
                 rel = path.relative_to(ROOT)
                 if not excluded.intersection(rel.parts) and not path.name.endswith((".secret", ".user")):
                     archive_file.write(path, "GuiaFotos/" + rel.as_posix())
-        products = [setup, portable, source_zip]
+        dependency_zip = Path(temp) / dependency_name
+        shutil.copy2(dependency_source, dependency_zip)
+        products = [setup, portable, source_zip, dependency_zip]
         report = {
             "version": VERSION,
             "installer_files": len(installed_manifest), "portable_files": len(portable_manifest),
