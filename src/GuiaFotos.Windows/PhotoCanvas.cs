@@ -12,7 +12,8 @@ public sealed class PhotoCanvas : Grid
 {
     private readonly Image image = new() { Stretch = Stretch.Uniform };
     private readonly Canvas overlay = new() { Background = Brushes.Transparent };
-    private readonly Rectangle crop = new() { Stroke = Brushes.White, StrokeThickness = 2, Fill = new SolidColorBrush(Color.FromArgb(35, 255, 255, 255)), Visibility = Visibility.Collapsed };
+    private readonly System.Windows.Shapes.Path shade = new() { Fill = new SolidColorBrush(Color.FromArgb(140, 0, 0, 0)), IsHitTestVisible = false, Visibility = Visibility.Collapsed };
+    private readonly Rectangle crop = new() { Stroke = Brushes.White, StrokeThickness = 2, Fill = Brushes.Transparent, Visibility = Visibility.Collapsed };
     private Point? start;
     private Rect? selection;
     private bool cropMode;
@@ -37,7 +38,7 @@ public sealed class PhotoCanvas : Grid
     public PhotoCanvas()
     {
         Background = new SolidColorBrush(Color.FromRgb(42, 44, 47)); ClipToBounds = true;
-        Children.Add(image); Children.Add(overlay); overlay.Children.Add(crop);
+        Children.Add(image); Children.Add(overlay); overlay.Children.Add(shade); overlay.Children.Add(crop);
         overlay.MouseLeftButtonDown += (_, e) => { if (!CropMode || Source == null) return; start = Clamp(e.GetPosition(this)); selection = null; overlay.CaptureMouse(); e.Handled = true; };
         overlay.MouseMove += (_, e) => { if (start is not { } point || !overlay.IsMouseCaptured) return; var end = Clamp(e.GetPosition(this)); SetCrop(new Rect(point, end)); e.Handled = true; };
         overlay.MouseLeftButtonUp += (_, e) => { if (start == null) return; start = null; overlay.ReleaseMouseCapture(); if (selection is { Width: < 5 } or { Height: < 5 }) ClearCrop(); CropChanged?.Invoke(); e.Handled = true; };
@@ -52,11 +53,11 @@ public sealed class PhotoCanvas : Grid
         return new Rect((ActualWidth - width * scale) / 2, (ActualHeight - height * scale) / 2, width * scale, height * scale);
     }
     private Point Clamp(Point point) { var bounds = ImageBounds(); return new Point(Math.Clamp(point.X, bounds.Left, bounds.Right), Math.Clamp(point.Y, bounds.Top, bounds.Bottom)); }
-    private void SetCrop(Rect rect) { selection = rect; Canvas.SetLeft(crop, rect.X); Canvas.SetTop(crop, rect.Y); crop.Width = rect.Width; crop.Height = rect.Height; crop.Visibility = Visibility.Visible; CropChanged?.Invoke(); }
+    private void SetCrop(Rect rect) { selection = rect; shade.Data = new CombinedGeometry(GeometryCombineMode.Exclude, new RectangleGeometry(ImageBounds()), new RectangleGeometry(rect)); shade.Visibility = Visibility.Visible; Canvas.SetLeft(crop, rect.X); Canvas.SetTop(crop, rect.Y); crop.Width = rect.Width; crop.Height = rect.Height; crop.Visibility = Visibility.Visible; CropChanged?.Invoke(); }
     public void SetNormalizedCrop(Rect rect)
     {
         if (rect.X < 0 || rect.Y < 0 || rect.Width <= 0 || rect.Height <= 0 || rect.Right > 1 || rect.Bottom > 1) throw new ArgumentOutOfRangeException(nameof(rect));
         var bounds = ImageBounds(); SetCrop(new Rect(bounds.X + rect.X * bounds.Width, bounds.Y + rect.Y * bounds.Height, rect.Width * bounds.Width, rect.Height * bounds.Height));
     }
-    public void ClearCrop() { start = null; if (overlay.IsMouseCaptured) overlay.ReleaseMouseCapture(); selection = null; crop.Visibility = Visibility.Collapsed; CropChanged?.Invoke(); }
+    public void ClearCrop() { start = null; if (overlay.IsMouseCaptured) overlay.ReleaseMouseCapture(); selection = null; crop.Visibility = shade.Visibility = Visibility.Collapsed; CropChanged?.Invoke(); }
 }

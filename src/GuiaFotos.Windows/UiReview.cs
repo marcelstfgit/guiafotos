@@ -42,8 +42,9 @@ public partial class MainWindow
         }
         try
         {
-            await LayoutReady(this); await Idle();
+            await LayoutReady(this); await Idle(); Refresh();
             await Capture("biblioteca-vazia-1366");
+            Check(!EditAction.IsEnabled && !ExportAction.IsEnabled, "empty library disables actions that require a photo");
             File.Copy(manifest, Path.Combine(output, "ui-sample-photos.json"), true);
             await File.WriteAllTextAsync(Path.Combine(output, "LEIA-ME.txt"), "Capturas reais do aplicativo WPF no Windows com fotografias de demonstração Unsplash. Fontes e checksums: ui-sample-photos.json. Licença: https://unsplash.com/license\nA imagem 1920-150 é uma renderização de 1280x720 DIPs em 144 dpi; não é um teste do DPI do monitor. O fluxo automatizado não comprova precisão facial nem todos os gestos de mouse/teclado.\nReal WPF screenshots on Windows using Unsplash demo photographs. Sources and checksums: ui-sample-photos.json. The 1920-150 image is a 144 dpi rendering, not a monitor DPI test.\n");
             var samples = JsonDocument.Parse(await File.ReadAllTextAsync(manifest));
