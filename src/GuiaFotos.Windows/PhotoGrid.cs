@@ -125,9 +125,10 @@ public sealed class PhotoGrid : UserControl
     public void ScrollTo(string path)
     {
         double offset = 0;
-        foreach (var row in layout)
+        for (var i = 0; i < layout.Count; i++)
         {
-            if (row.Tiles.Any(p => Same(p.Item.Path, path))) { FindScroll(rows)?.ScrollToVerticalOffset(offset); return; }
+            var row = layout[i];
+            if (row.Tiles.Any(p => Same(p.Item.Path, path))) { if (i > 0 && layout[i - 1].Tiles.Count == 0) offset -= layout[i - 1].Height; FindScroll(rows)?.ScrollToVerticalOffset(offset); return; }
             offset += row.Height;
         }
     }

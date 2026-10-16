@@ -105,7 +105,7 @@ public partial class MainWindow
     { if (LibraryBusy) { Status.Text = "Aguarde a tarefa atual antes de organizar as fotos."; return; } foreach (var item in Selection()) { var updated = item with { Rating = item.Rating > 0 ? 0 : 5 }; SaveCatalogItem(updated); if (editorItem?.Path == item.Path && EditorScreen.Visibility == Visibility.Visible) Rating.SelectedIndex = updated.Rating; } libraryDirty = true; Refresh(); }
     private void SaveCatalogItem(MediaItem item)
     { catalog.Add(item); if (editorItem?.Path == item.Path) editorItem = item; if (previewSource?.Path == item.Path) previewSource = item; }
-    private async void EditSelected(object sender, RoutedEventArgs e) { if (Gallery.SelectedItem is { } item) await OpenEditor(item); else Status.Text = "Selecione uma foto ou dê duplo clique em uma miniatura."; }
+    private async void EditSelected(object sender, RoutedEventArgs e) { if (EditorScreen.Visibility == Visibility.Visible) { Preview.Focus(); return; } if (CurrentPhoto is { } item) await OpenEditor(item); else Status.Text = "Selecione uma foto ou dê duplo clique em uma miniatura."; }
     private void SaveEditSession()
     { if (editorItem != null) editSessions[editorItem.Path] = new EditSession(previewFile, undoEdits.ToArray(), redoEdits.ToArray()); }
     private async Task<bool> OpenEditor(MediaItem item)
@@ -202,14 +202,14 @@ public partial class MainWindow
     {
         if (CurrentPhoto is not { } item) return;
         if (item.Kind != "Foto") { Status.Text = "Selecione uma foto para imprimir."; return; }
-        try { if (!await OpenEditor(item) || Preview.Source == null) return; var dialog = new PrintDialog(); if (dialog.ShowDialog() != true) return; var image = new Image { Source = Preview.Source, Stretch = Stretch.Uniform, Width = dialog.PrintableAreaWidth, Height = dialog.PrintableAreaHeight }; image.Measure(new Size(image.Width, image.Height)); image.Arrange(new Rect(0, 0, image.Width, image.Height)); dialog.PrintVisual(image, item.Name); }
+        try { if (EditorScreen.Visibility != Visibility.Visible && !await OpenEditor(item) || Preview.Source == null || Preview.OriginalWidth < 1) return; var dialog = new PrintDialog(); if (dialog.ShowDialog() != true) return; var image = new Image { Source = Preview.Source, Stretch = Stretch.Uniform, Width = dialog.PrintableAreaWidth, Height = dialog.PrintableAreaHeight }; image.Measure(new Size(image.Width, image.Height)); image.Arrange(new Rect(0, 0, image.Width, image.Height)); dialog.PrintVisual(image, item.Name); }
         catch (Exception error) { Info(error.Message); }
     }
     private void ExitApplication(object sender, RoutedEventArgs e) => Close();
     private void ShowAbout(object sender, RoutedEventArgs e) => Info("GuiaFotos\nOrganize suas fotos por pastas, pessoas e semelhança.\nProjeto independente inspirado na experiência do Picasa.");
     private void WindowKeyboard(object sender, KeyEventArgs e)
     {
-        if (e.OriginalSource is TextBoxBase || e.OriginalSource is PasswordBox || e.OriginalSource is ComboBox) return;
+        if (e.OriginalSource is TextBoxBase or PasswordBox or ComboBox or RangeBase) return;
         if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.O) { AddFolder(sender, e); e.Handled = true; }
         else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.E) { ExportSelected(sender, e); e.Handled = true; }
         else if (e.Key == Key.F5) { RefreshFolder(sender, e); e.Handled = true; }

@@ -31,7 +31,7 @@ public partial class MainWindow
             // WPF's minimum layout size takes precedence over a headless CI
             // desktop's tracking limit. This fixes the render viewport without
             // changing the user's normal resizable window or monitor settings.
-            MinWidth = Width = width; MinHeight = Height = height; Left = Top = 0; await LayoutReady(this);
+            MinWidth = width; MinHeight = height; Width = width; Height = height; Left = Top = 0; await LayoutReady(this);
             var root = (FrameworkElement)Content;
             Check(Math.Abs(root.ActualWidth - width) < 1 && Math.Abs(root.ActualHeight - height) < 1, $"capture viewport {name}: {root.ActualWidth}x{root.ActualHeight} DIPs, requested {width}x{height}");
             var bitmap = new RenderTargetBitmap((int)Math.Round(root.ActualWidth * scale), (int)Math.Round(root.ActualHeight * scale), 96 * scale, 96 * scale, PixelFormats.Pbgra32);

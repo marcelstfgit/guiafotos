@@ -228,5 +228,5 @@ public partial class MainWindow : Window
         }); }
     private void CancelTask(object sender, RoutedEventArgs e) => task?.Cancel();
     private void ClosingApp(object? sender, CancelEventArgs e)
-    { if (task != null || peopleView.Busy || versionsView.Busy) { e.Cancel = true; task?.Cancel(); peopleView.Cancel(); versionsView.Cancel(); Info("Cancelando a tarefa. Feche novamente quando ela terminar."); return; } peopleView.Dispose(); versionsView.Dispose(); catalog.Dispose(); }
+    { if (task != null || peopleView.Busy || versionsView.Busy) { e.Cancel = true; task?.Cancel(); peopleView.Cancel(); versionsView.Cancel(); Info("Cancelando a tarefa. Feche novamente quando ela terminar."); return; } editorLoad?.Cancel(); editorLoad?.Dispose(); peopleView.Dispose(); versionsView.Dispose(); catalog.Dispose(); }
 }
