@@ -4,15 +4,32 @@ Set-Location $PSScriptRoot
 $downloadDir = Join-Path $PSScriptRoot "artifacts/downloads"
 $nativeDir = Join-Path $PSScriptRoot "tools/windows"
 New-Item -ItemType Directory -Force $downloadDir, $nativeDir | Out-Null
+function Get-VerifiedDownload([string]$Destination, [string[]]$Urls, [string]$Hash) {
+    if ((Test-Path $Destination) -and (Get-FileHash $Destination -Algorithm SHA256).Hash.ToLowerInvariant() -eq $Hash) { return }
+    $failures = @()
+    foreach ($url in $Urls) {
+        $temporary = "$Destination.$([guid]::NewGuid().ToString('N')).part"
+        try {
+            Write-Host "Baixando $(Split-Path $Destination -Leaf): $url"
+            Invoke-WebRequest -Uri $url -OutFile $temporary -TimeoutSec 180 -MaximumRetryCount 2 -RetryIntervalSec 3 -UserAgent "GuiaFotos-build/0.2.0"
+            if ((Get-FileHash $temporary -Algorithm SHA256).Hash.ToLowerInvariant() -ne $Hash) { throw "Checksum inválido: $(Split-Path $Destination -Leaf)" }
+            Move-Item -Force $temporary $Destination
+            return
+        } catch {
+            $failures += "$url : $($_.Exception.Message)"
+            Write-Warning $failures[-1]
+        } finally { Remove-Item -Force $temporary -ErrorAction SilentlyContinue }
+    }
+    throw "Download verificado falhou: $($failures -join ' | ')"
+}
 $archives = @(
-    @{ Name="exiftool-13.59_64.zip"; Url="https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download"; Hash="44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec" },
-    @{ Name="imagemagick-7.1.2-33-x64.7z"; Url="https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"; Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" },
-    @{ Name="ffmpeg-8.1.2-win64.zip"; Url="https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip"; Hash="db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec" }
+    @{ Name="exiftool-13.59_64.zip"; Urls=@("https://downloads.sourceforge.net/project/exiftool/exiftool-13.59_64.zip", "https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download"); Hash="44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec" },
+    @{ Name="imagemagick-7.1.2-33-x64.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"); Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" },
+    @{ Name="ffmpeg-8.1.2-win64.zip"; Urls=@("https://github.com/GyanD/codexffmpeg/releases/download/8.1.2/ffmpeg-8.1.2-essentials_build.zip", "https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-8.1.2-essentials_build.zip"); Hash="db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec" }
 )
 foreach ($archive in $archives) {
     $destination = Join-Path $downloadDir $archive.Name
-    if (!(Test-Path $destination)) { Invoke-WebRequest -Uri $archive.Url -OutFile $destination }
-    if ((Get-FileHash $destination -Algorithm SHA256).Hash.ToLowerInvariant() -ne $archive.Hash) { throw "Checksum inválido: $($archive.Name)" }
+    Get-VerifiedDownload $destination $archive.Urls $archive.Hash
 }
 Expand-Archive -Force (Join-Path $downloadDir "exiftool-13.59_64.zip") (Join-Path $downloadDir "exiftool-unpacked")
 Copy-Item -Recurse -Force (Join-Path $downloadDir "exiftool-unpacked/exiftool-13.59_64/exiftool_files") $nativeDir
@@ -57,7 +74,7 @@ $faceLicenses = @{
 }
 foreach ($entry in $faceLicenses.GetEnumerator()) {
     $licenseFile = Join-Path $faceDir "$($entry.Key)-LICENSE.txt"
-    if (!(Test-Path $licenseFile)) { Invoke-WebRequest $entry.Value -OutFile $licenseFile }
+    Copy-Item -Force (Join-Path $PSScriptRoot "licenses/recognition/$($entry.Key)-LICENSE.txt") $licenseFile
 }
 if ($WithSscd) {
     $sscdDir = Join-Path $nativeDir "sscd"

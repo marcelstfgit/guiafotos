@@ -20,7 +20,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build Windows package with pinned tools
         shell: pwsh
-        run: ./build-windows.ps1 -WithSscd
+        run: |
+          try { ./build-windows.ps1 -WithSscd }
+          catch {
+            $message = $_.Exception.Message.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Host "::error::$message"
+            Write-Host $_.ScriptStackTrace
+            $_ | Format-List * -Force
+            exit 1
+          }
       - name: Core integration tests including DPAPI and Windows tools
         shell: pwsh
         run: |
