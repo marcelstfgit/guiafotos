@@ -1,3 +1,5 @@
-System.InvalidOperationException: UI review failed: photos occupy the main library area
-   at GuiaFotos.Windows.MainWindow.<>c__DisplayClass155_1.<ReviewInterface>g__Check|0(Boolean condition, String name) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 27
-   at GuiaFotos.Windows.MainWindow.ReviewInterface(String output, String manifest) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 69
+System.InvalidOperationException: UI review failed: capture viewport biblioteca-vazia-1366 has the requested WPF size
+   at GuiaFotos.Windows.MainWindow.<>c__DisplayClass159_1.<ReviewInterface>g__Check|0(Boolean condition, String name) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 27
+   at GuiaFotos.Windows.MainWindow.<>c__DisplayClass159_1.<<ReviewInterface>g__Capture|1>d.MoveNext() in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 33
+--- End of stack trace from previous location ---
+   at GuiaFotos.Windows.MainWindow.ReviewInterface(String output, String manifest) in D:\a\guiafotos\guiafotos\src\GuiaFotos.Windows\UiReview.cs:line 43
