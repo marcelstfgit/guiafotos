@@ -6,6 +6,8 @@ Organizador de fotos para Windows, inspirado na praticidade do Picasa, com foco 
 
 **Projeto em desenvolvimento · 0.2.0 de pré-validação.**
 
+[Downloads no GitHub Releases](https://github.com/marcelstfgit/guiafotos/releases) · instalador e portátil para Windows x64.
+
 ## Por que existe
 
 O Picasa tornou a organização de fotos no computador acessível: navegar pelas pastas, reencontrar momentos e fazer ajustes simples fazia parte da mesma experiência. Para quem cuidava de uma coleção pessoal, essa praticidade deixou saudade.
@@ -37,7 +39,7 @@ No Windows, instale .NET SDK 8, Python 3.11+, 7-Zip e MSYS2 MINGW64. A primeira 
 .\build-windows.ps1
 ```
 
-O executável, o instalador e o ZIP portátil são gerados em `artifacts/`. O [workflow Windows](.github/workflows/windows.yml) reúne a compilação e as verificações automatizadas; a publicação de uma tag exige que todas passem.
+O executável, o instalador e o ZIP portátil são gerados em `artifacts/`. O [workflow Windows](.github/workflows/windows.yml) reúne a compilação e as verificações automatizadas; a publicação de uma versão exige que todas passem.
 
 ## Contribuir
 

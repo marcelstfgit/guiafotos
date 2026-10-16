@@ -25,18 +25,27 @@ public sealed class PhotoEditor(ToolPaths tools, MediaLibrary library, FileActio
     {
         ValidateMetadata(updates, advancedMode);
         var target = Output(source, directory, "_metadata"); var temp = target + ".partial";
+        var input = Path.Combine(Path.GetTempPath(), "guiafotos-metadata-" + Guid.NewGuid().ToString("N") + ".json");
         try
         {
             await FileActions.CopyVerified(source, temp, token);
-            var args = new List<string> { "-overwrite_original", "-charset", "filename=UTF8" };
-            args.AddRange(updates.Select(x => "-" + x.Key + "=" + x.Value)); args.Add("--"); args.Add(temp);
-            var result = await Tools.Text(tools.ExifTool, args, token);
-            if (!Regex.IsMatch(result, "[1-9][0-9]* image files? updated")) throw new IOException("Nenhum campo foi atualizado; tag pode ser somente leitura ou não suportada neste formato.");
+            var values = updates.Where(x => x.Value.Length > 0).ToDictionary(x => x.Key, x => "base64:" + Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(x.Value)));
+            values["SourceFile"] = temp;
+            var options = new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write, Share = FileShare.None };
+            if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+            await using (var stream = new FileStream(input, options))
+                await System.Text.Json.JsonSerializer.SerializeAsync(stream, new[] { values }, cancellationToken: token);
+            var args = new List<string> { "-overwrite_original", "-charset", "filename=UTF8", "-json=" + input };
+            args.AddRange(updates.Where(x => x.Value.Length == 0).Select(x => "-" + x.Key + "="));
+            args.AddRange(["--", temp]);
+            // JSON import writes its update summary to stderr.
+            var result = await Tools.Text(tools.ExifTool, args, token, includeDiagnostics: true);
+            if (!Regex.IsMatch(result, "[1-9][0-9]* image files? updated")) throw new IOException("Nenhum campo foi atualizado; tag pode ser somente leitura ou não suportada neste formato. " + result.Trim());
             var metadata = await library.Metadata(temp, token);
             File.Move(temp, target); actions.Record("metadata-copy", source, target, await Files.Hash(target, token));
             Files.AtomicText(target + ".metadata.json", Json.Write(metadata)); return target;
         }
-        finally { if (File.Exists(temp)) File.Delete(temp); }
+        finally { if (File.Exists(input)) File.Delete(input); if (File.Exists(temp)) File.Delete(temp); }
     }
     public async Task<string> StripExif(string source, string directory, bool allPrivate = false, CancellationToken token = default)
     {

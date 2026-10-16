@@ -30,6 +30,23 @@ await Test("AV1 decodifica por software sem aceleração de hardware", async () 
 });
 await Test("catálogo/miniatura/data Unicode; originais intactos", async () => { Assert(item.Taken.Year == 2025 && item.Taken.Month == 12, "Data EXIF ignorada."); Assert(File.Exists(item.Thumbnail), "Sem thumbnail."); Assert(await Files.Hash(photo) == originalHash, "Importação alterou original."); });
 await Test("metadados completos e edição efetiva em cópia", async () => { var edited = await editor.MetadataCopy(photo, Path.Combine(root, "out"), new Dictionary<string, string> { ["XMP:Description"] = "Novo título" }); var metadata = await library.Metadata(edited); Assert(metadata.Any(x => x.Key.EndsWith(":Description") && x.Value.ToString() == "Novo título"), "Edição não persistiu."); Assert(await Files.Hash(photo) == originalHash, "Original editado."); });
+await Test("metadados Unicode multilinha preservam texto sem injetar argumentos", async () => {
+    var description = "  coração 日本 📷\n# comentário\n-XMP:Title=apenas texto\nC:\\Fotos\\família\ncontato@example.com $100  ";
+    var edited = await editor.MetadataCopy(photo, Path.Combine(root, "out"), new Dictionary<string, string> { ["XMP:Description"] = description });
+    var metadata = await library.Metadata(edited);
+    Assert(metadata.Any(x => x.Key.EndsWith(":Description") && x.Value.ToString() == description), "Texto Unicode/multilinha alterado.");
+    Assert(!metadata.Keys.Any(x => x.EndsWith(":Title")), "Texto virou argumento ExifTool.");
+    Assert(await Files.Hash(photo) == originalHash, "Metadados alteraram original.");
+});
+await Test("edição preserva base64 literal e hífen; campo vazio apaga a tag", async () => {
+    foreach (var value in new[] { "base64:aGVsbG8=", "-", "" })
+    {
+        var edited = await editor.MetadataCopy(photo, Path.Combine(root, "out"), new Dictionary<string, string> { ["XMP:Description"] = value });
+        var metadata = await library.Metadata(edited);
+        Assert(value.Length == 0 ? !metadata.Keys.Any(x => x.EndsWith(":Description")) : metadata.Any(x => x.Key.EndsWith(":Description") && x.Value.ToString() == value), "Importação mudou texto ou semântica de exclusão.");
+    }
+    Assert(await Files.Hash(photo) == originalHash, "Original modificado.");
+});
 await Test("bloqueia tags de caminho e coordenadas fora de faixa", async () => { await Throws(() => editor.MetadataCopy(photo, root, new Dictionary<string, string> { ["FileName"] = "outro.jpg" })); await Throws(() => editor.MetadataCopy(photo, root, new Dictionary<string, string> { ["GPSLatitude"] = "999" })); });
 await Test("remoção EXIF preserva pixels e original", async () => { var stripped = await editor.StripExif(photo, Path.Combine(root, "out")); var metadata = await library.Metadata(stripped); Assert(!metadata.Keys.Any(x => x.StartsWith("GPS:") || x.StartsWith("ExifIFD:")), "EXIF permaneceu."); var first = await Tools.Run(tools.Ffmpeg, ["-v", "error", "-i", photo, "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"]); var second = await Tools.Run(tools.Ffmpeg, ["-v", "error", "-i", stripped, "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"]); Assert(first.SequenceEqual(second), "Pixels foram reencodados sem necessidade."); Assert(await Files.Hash(photo) == originalHash, "Original modificado."); });
 await Test("privacidade remove XMP/IPTC/GPS e auditoria não vaza valores", async () => { var stripped = await editor.StripExif(photo, Path.Combine(root, "out"), true); var metadata = await library.Metadata(stripped); Assert(!metadata.Keys.Any(x => x.StartsWith("XMP") || x.StartsWith("IPTC:") || x.StartsWith("GPS:")), "Metadados pessoais permaneceram."); Assert(!File.ReadAllText(stripped + ".audit.json").Contains("privado"), "Auditoria vazou metadado."); });
