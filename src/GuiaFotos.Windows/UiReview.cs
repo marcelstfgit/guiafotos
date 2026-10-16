@@ -89,7 +89,7 @@ public partial class MainWindow
             var editing = Gallery.Items[0]; Check(await OpenEditor(editing), "open the selected original in the integrated editor"); await Capture("editor-1366");
             Check(Preview.ActualWidth > 900 && Preview.ActualHeight > 450, "editor has a large photo canvas");
             var originalWidth = Preview.OriginalWidth; var originalHeight = Preview.OriginalHeight;
-            Crop(this, new RoutedEventArgs()); Preview.SetNormalizedCrop(new Rect(.12, .14, .64, .62));
+            Crop(this, new RoutedEventArgs()); await LayoutReady(this); Preview.SetNormalizedCrop(new Rect(.12, .14, .64, .62));
             var geometry = Preview.CropGeometry;
             var expectedCropWidth = (int)Math.Round(originalWidth * .64); var expectedCropHeight = (int)Math.Round(originalHeight * .62);
             Check(geometry == $"{expectedCropWidth}x{expectedCropHeight}+{(int)Math.Round(originalWidth * .12)}+{(int)Math.Round(originalHeight * .14)}" && ApplyCropButton.IsEnabled, "visual crop maps normalized bounds to exact original pixels");

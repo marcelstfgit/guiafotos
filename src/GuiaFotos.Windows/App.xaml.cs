@@ -13,7 +13,11 @@ public partial class App : Application
             ShutdownMode = ShutdownMode.OnExplicitShutdown;
             if (review) Environment.SetEnvironmentVariable("GUIAFOTOS_UI_REVIEW_ROOT", System.IO.Path.Combine(System.IO.Path.GetTempPath(), "guiafotos-ui-review-" + Guid.NewGuid().ToString("N")));
             base.OnStartup(e);
-            window = new MainWindow(true); window.Show();
+            window = new MainWindow(true);
+            // Set these before HWND creation: a normal resizable HWND caches the
+            // CI virtual screen's maximum tracking size (often only 1024x768).
+            if (review) { window.WindowStyle = WindowStyle.None; window.ResizeMode = ResizeMode.NoResize; }
+            window.Show();
             if (review) await window.ReviewInterface(e.Args[1], e.Args[2]);
             var paths = ToolPaths.Discover(AppContext.BaseDirectory);
             await Tools.Text(paths.ExifTool, ["-ver"]); await Tools.Text(paths.Ffmpeg, ["-version"]); await Tools.Text(paths.Ffprobe, ["-version"]); await Tools.Text(paths.Magick, ["-version"]);

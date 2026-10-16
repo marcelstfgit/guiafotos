@@ -21,15 +21,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Prepare CI desktop for photo review
-        shell: pwsh
-        run: |
-          try { ./scripts/prepare-ui-desktop.ps1 }
-          catch {
-            $message = ($_ | Out-String).Trim().Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
-            Write-Host "::error::$message"
-            exit 1
-          }
       - name: Release gate regression tests
         shell: pwsh
         run: python -m unittest discover -s tests -p test_release_validation.py
