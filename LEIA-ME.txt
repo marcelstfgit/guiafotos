@@ -1,0 +1,6 @@
+GuiaFotos — capturas da interface em revisão.
+
+As imagens são geradas pelo aplicativo WPF no Windows com fotos de demonstração.
+Confira o commit e os resultados em validacao-interface.json.
+Fotos de demonstração: Unsplash, https://unsplash.com/license
+Este ramo contém somente evidências visuais de desenvolvimento.
