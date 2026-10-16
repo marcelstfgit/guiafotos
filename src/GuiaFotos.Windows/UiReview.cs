@@ -93,6 +93,7 @@ public partial class MainWindow
             var editing = Gallery.Items[0]; Check(await OpenEditor(editing), "open the selected original in the integrated editor"); await Capture("editor-1366");
             Check(Preview.ActualWidth > 900 && Preview.ActualHeight > 450, "editor has a large photo canvas");
             Check(UndoButton.IsVisible && RedoButton.IsVisible && UndoButton.TransformToAncestor(this).Transform(new Point()).Y < ActualHeight - 120, "undo and redo stay visible without scrolling the tools");
+            Check(ApplyAdjustmentsButton.TransformToAncestor(this).Transform(new Point(0, ApplyAdjustmentsButton.ActualHeight)).Y < UndoButton.TransformToAncestor(this).Transform(new Point()).Y, "light and color apply action fits above the fixed editor actions");
             var originalWidth = Preview.OriginalWidth; var originalHeight = Preview.OriginalHeight;
             Crop(this, new RoutedEventArgs()); await LayoutReady(this); Preview.SetNormalizedCrop(new Rect(.12, .14, .64, .62));
             var geometry = Preview.CropGeometry;
