@@ -6,7 +6,7 @@
   <DataTemplate x:Key="LocationTemplate"><Grid Margin="8,5"><Grid.ColumnDefinitions><ColumnDefinition Width="22"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Foreground="#B49657" VerticalAlignment="Center"/><TextBlock Grid.Column="1" Text="{Binding Name}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}"/><TextBlock Grid.Column="2" Text="{Binding Count}" Foreground="#858B92" Margin="8,0,2,0"/></Grid></DataTemplate>
   <Style x:Key="LocationItem" TargetType="ListBoxItem"><Setter Property="Padding" Value="0"/><Setter Property="HorizontalContentAlignment" Value="Stretch"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Margin" Value="0,1"/></Style>
  </Window.Resources>
- <Grid>
+ <Grid Background="#F2F2F2">
   <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="24"/></Grid.RowDefinitions>
   <Menu Background="#F7F7F7" BorderBrush="#D2D4D6" BorderThickness="0,0,0,1" Padding="4,2">
    <MenuItem Header="_Arquivo"><MenuItem Header="Adicionar pasta…" InputGestureText="Ctrl+O" Click="AddFolder"/><MenuItem Header="Exportar seleção…" InputGestureText="Ctrl+E" Click="ExportSelected"/><MenuItem Header="Imprimir foto…" Click="PrintSelected"/><Separator/><MenuItem Header="Sair" Click="ExitApplication"/></MenuItem>

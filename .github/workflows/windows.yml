@@ -135,6 +135,9 @@ jobs:
         shell: pwsh
         run: |
           if (!(Test-Path artifacts/ui-review)) { exit 0 }
+          foreach ($name in @('biblioteca-vazia-1366.png', 'biblioteca-1366.png', 'biblioteca-1920-150.png', 'editor-1366.png', 'recorte-1366.png', 'falha-interface.png', 'validacao-interface.json', 'erro-interface.txt', 'ui-sample-photos.json')) {
+            Remove-Item (Join-Path artifacts/ui-preview-site $name) -Force -ErrorAction SilentlyContinue
+          }
           Copy-Item artifacts/ui-review/* artifacts/ui-preview-site/ -Force
           Push-Location artifacts/ui-preview-site
           git config user.name 'GuiaFotos CI'
