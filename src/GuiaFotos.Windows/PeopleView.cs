@@ -49,39 +49,28 @@ public sealed class PeopleView : UserControl, IDisposable
     {
         var panel = new DockPanel { Margin = new Thickness(14) }; Content = panel;
         var header = new StackPanel(); DockPanel.SetDock(header, Dock.Top); panel.Children.Add(header);
-        header.Children.Add(new TextBlock { Text = "Pessoas nas suas fotos", FontSize = 23, FontWeight = FontWeights.SemiBold });
-        header.Children.Add(new TextBlock { Text = "Nomeie um rosto para encontrar outras fotos da mesma pessoa. Os resultados são sugestões: confirme os acertos e rejeite os erros. As fotos são processadas neste computador.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(4, 8, 4, 8) });
-        var selection = new WrapPanel(); header.Children.Add(selection);
-        selection.Children.Add(new TextBlock { Text = "Motor de reconhecimento:", VerticalAlignment = VerticalAlignment.Center });
-        selection.Children.Add(modelSelector); selection.Children.Add(detectorSelector); selection.Children.Add(detailed); selection.Children.Add(forceFaces); header.Children.Add(modelDescription);
+        header.Children.Add(new TextBlock { Text = "Pessoas", FontSize = 23, FontWeight = FontWeights.SemiBold });
+        header.Children.Add(new TextBlock { Text = "Dê um nome a um rosto e encontre outras fotos da mesma pessoa.", Foreground = System.Windows.Media.Brushes.DimGray, Margin = new Thickness(0, 6, 0, 13) });
+        var primary = new WrapPanel(); header.Children.Add(primary);
+        Add(primary, "Analisar biblioteca", Analyze); modelSelector.MinWidth = 250; primary.Children.Add(modelSelector);
+        Add(primary, "Nomear…", NameFace); Add(primary, "Unir pessoas", MergePeople); Add(primary, "Desfazer", () => Change(() => { index?.Undo(); })); Add(primary, "Cancelar", Cancel);
+        var toolbar = new WrapPanel { Margin = new Thickness(0, 7, 0, 8) }; header.Children.Add(toolbar);
+        Add(toolbar, "Buscar pessoa", Search); Add(toolbar, "Confirmar", ConfirmFaces); Add(toolbar, "Não é esta pessoa", RejectFaces); Add(toolbar, "Abrir foto", OpenPhoto);
+        toolbar.Children.Add(new TextBlock { Text = "Semelhança:", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(12, 0, 3, 0) }); toolbar.Children.Add(threshold);
+        var options = new Expander { Header = "Opções de reconhecimento", Margin = new Thickness(3, 0, 3, 10) }; header.Children.Add(options);
+        var settingsPanel = new StackPanel(); options.Content = settingsPanel; var detectionPanel = new WrapPanel(); settingsPanel.Children.Add(detectionPanel);
+        detectionPanel.Children.Add(detectorSelector); detectionPanel.Children.Add(detailed); detectionPanel.Children.Add(forceFaces); settingsPanel.Children.Add(modelDescription);
+        var grouping = new WrapPanel { Margin = new Thickness(4) }; settingsPanel.Children.Add(grouping);
+        grouping.Children.Add(new TextBlock { Text = "Agrupamento:", VerticalAlignment = VerticalAlignment.Center }); grouping.Children.Add(clusterThreshold);
+        grouping.Children.Add(new TextBlock { Text = "Mínimo de fotos:", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 3, 0) }); grouping.Children.Add(minimumFaces);
+        Add(grouping, "Reagrupar", RebuildGroups); Add(grouping, "Nomear grupo…", () => NameFaces(true));
         threshold.ValueChanged += (_, _) => SavePreferences(); clusterThreshold.ValueChanged += (_, _) => SavePreferences();
         detectorSelector.SelectionChanged += (_, _) => SavePreferences(); detailed.Checked += (_, _) => SavePreferences(); detailed.Unchecked += (_, _) => SavePreferences(); minimumFaces.SelectionChanged += (_, _) => SavePreferences();
         modelSelector.SelectionChanged += (_, _) => {
             if (modelSelector.SelectedItem is not FaceProfile selected || string.IsNullOrEmpty(workspace)) return;
             if (Busy) { modelSelector.SelectedItem = profile; return; }
-            try { SwitchProfile(selected); }
-            catch (Exception error) { status.Text = error.Message; modelSelector.SelectedItem = profile; }
+            try { SwitchProfile(selected); } catch (Exception error) { status.Text = error.Message; modelSelector.SelectedItem = profile; }
         };
-        var toolbar = new WrapPanel(); header.Children.Add(toolbar);
-        Add(toolbar, "Analisar fotos da biblioteca", Analyze);
-        Add(toolbar, "Nomear selecionados / separar…", NameFace);
-        Add(toolbar, "Nomear grupo inteiro…", () => NameFaces(true));
-        Add(toolbar, "Unir pessoas selecionadas", MergePeople);
-        Add(toolbar, "Desfazer correção", () => Change(() => { index?.Undo(); }));
-        Add(toolbar, "Reagrupar biblioteca", RebuildGroups);
-        Add(toolbar, "Buscar pessoa", Search);
-        Add(toolbar, "Confirmar selecionados", ConfirmFaces);
-        Add(toolbar, "Não é esta pessoa", RejectFaces);
-        Add(toolbar, "Abrir foto original", OpenPhoto);
-        Add(toolbar, "Instalar runtime facial…", () => {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://aka.ms/vc14/vc_redist.x64.exe") { UseShellExecute = true });
-            status.Text = "Baixe e instale o Microsoft Visual C++ x64 pelo endereço oficial aberto no navegador e tente analisar novamente. O instalador da Microsoft pode pedir permissão de administrador.";
-        });
-        Add(toolbar, "Cancelar", Cancel);
-        toolbar.Children.Add(new TextBlock { Text = "Exigência de semelhança:", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(6) }); toolbar.Children.Add(threshold);
-        var grouping = new WrapPanel { Margin = new Thickness(4) }; header.Children.Add(grouping);
-        grouping.Children.Add(new TextBlock { Text = "Semelhança para agrupar:", VerticalAlignment = VerticalAlignment.Center }); grouping.Children.Add(clusterThreshold);
-        grouping.Children.Add(new TextBlock { Text = "Mínimo de fotos para formar grupo:", VerticalAlignment = VerticalAlignment.Center }); grouping.Children.Add(minimumFaces);
         DockPanel.SetDock(status, Dock.Bottom); panel.Children.Add(status);
         var columns = new Grid(); columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(230) }); columns.ColumnDefinitions.Add(new ColumnDefinition()); panel.Children.Add(columns);
         var left = new DockPanel { Margin = new Thickness(4) }; columns.Children.Add(left);
@@ -89,11 +78,14 @@ public sealed class PeopleView : UserControl, IDisposable
         list.Children.Add(new TextBlock { Text = "Pessoas identificadas", FontWeight = FontWeights.Bold }); people.MaxHeight = 230; list.Children.Add(people);
         list.Children.Add(new TextBlock { Text = "Grupos sugeridos / sem nome", FontWeight = FontWeights.Bold, Margin = new Thickness(0, 14, 0, 5) }); groups.MaxHeight = 350; list.Children.Add(groups);
         Grid.SetColumn(matches, 1); columns.Children.Add(matches);
+        var virtualPanel = new FrameworkElementFactory(typeof(VirtualizingPhotoPanel)); matches.ItemsPanel = new ItemsPanelTemplate(virtualPanel);
+        ScrollViewer.SetCanContentScroll(matches, true); ScrollViewer.SetHorizontalScrollBarVisibility(matches, ScrollBarVisibility.Disabled);
         var template = new DataTemplate(typeof(PersonMatch));
-        var item = new FrameworkElementFactory(typeof(StackPanel)); item.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-        var image = new FrameworkElementFactory(typeof(Image)); image.SetValue(Image.WidthProperty, 100.0); image.SetValue(Image.HeightProperty, 100.0); image.SetBinding(Image.SourceProperty, new Binding("Thumbnail")); item.AppendChild(image);
-        var text = new FrameworkElementFactory(typeof(TextBlock)); text.SetBinding(TextBlock.TextProperty, new Binding("Description")); text.SetValue(TextBlock.MarginProperty, new Thickness(12)); text.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap); item.AppendChild(text);
+        var item = new FrameworkElementFactory(typeof(StackPanel)); item.SetValue(FrameworkElement.WidthProperty, 158d); item.SetValue(FrameworkElement.MarginProperty, new Thickness(6));
+        var image = new FrameworkElementFactory(typeof(Image)); image.SetValue(Image.WidthProperty, 150d); image.SetValue(Image.HeightProperty, 128d); image.SetValue(Image.StretchProperty, System.Windows.Media.Stretch.Uniform); image.SetBinding(Image.SourceProperty, new Binding("Thumbnail")); item.AppendChild(image);
+        var text = new FrameworkElementFactory(typeof(TextBlock)); text.SetBinding(TextBlock.TextProperty, new Binding("Description")); text.SetValue(TextBlock.MarginProperty, new Thickness(2, 6, 2, 0)); text.SetValue(FrameworkElement.MaxHeightProperty, 34d); text.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap); text.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis); item.AppendChild(text);
         template.VisualTree = item; matches.ItemTemplate = template;
+        matches.MouseDoubleClick += (_, _) => OpenPhoto();
         people.SelectionChanged += (_, _) => { if (!refreshing && operation == null && people.SelectedItem != null) Search(); };
         Loaded += (_, _) => { if (groups.ItemsSource == null) RebuildGroups(); };
         groups.SelectionChanged += (_, _) => { if (groups.SelectedItem is FaceGroup group) { search?.Cancel(); matches.ItemsSource = group.Faces.Select(f => new PersonMatch(f, 0, false)).ToList(); status.Text = group.Description + ". Nomeie um rosto para buscar a pessoa."; } };

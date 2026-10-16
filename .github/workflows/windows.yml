@@ -10,6 +10,8 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      contents: write
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
@@ -108,6 +110,42 @@ jobs:
           $env:GUIAFOTOS_ONNX_LIBRARY = (Resolve-Path artifacts/windows-x64/tools/faces/onnxruntime.dll).Path
           $env:GUIAFOTOS_TEST_PRETRAINED = '1'
           ./scripts/run-tests.ps1 -Project tests/GuiaFotos.AdvancedTests/GuiaFotos.AdvancedTests.csproj -Log artifacts/test-advanced.log
+      - name: Exercise desktop photo flow and capture real WPF views
+        id: ui-review
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          $env:GUIAFOTOS_SMOKE_LOG = Join-Path (Resolve-Path artifacts).Path 'ui-review-error.log'
+          $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--ui-review artifacts/ui-review tests/ui-sample-photos.json' -PassThru
+          if (!$process.WaitForExit(240000)) { $process.Kill(); throw 'Desktop UI review timed out' }
+          if ($process.ExitCode -ne 0) {
+            $details = (Get-Content artifacts/ui-review-error.log, artifacts/ui-review/erro-interface.txt -ErrorAction SilentlyContinue | Out-String).Trim().Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Host "::error::$details"
+            throw 'Desktop UI review failed'
+          }
+      - uses: actions/checkout@v4
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.package.outcome == 'success' }}
+        with:
+          ref: ui-previews
+          path: artifacts/ui-preview-site
+      - name: Publish desktop screenshots for visual review
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.package.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          if (!(Test-Path artifacts/ui-review)) { exit 0 }
+          Copy-Item artifacts/ui-review/* artifacts/ui-preview-site/ -Force
+          Push-Location artifacts/ui-preview-site
+          git config user.name 'GuiaFotos CI'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "docs: desktop UI review $env:GITHUB_SHA"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            git push origin ui-previews
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Pop-Location
       - name: Full grouping, persistent index, corrections and image variants
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh

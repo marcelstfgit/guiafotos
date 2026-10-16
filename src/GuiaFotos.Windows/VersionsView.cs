@@ -36,21 +36,23 @@ public sealed class VersionsView : UserControl, IDisposable
     {
         var root = new DockPanel { Margin = new Thickness(14) }; Content = root;
         var header = new StackPanel(); DockPanel.SetDock(header, Dock.Top); root.Children.Add(header);
-        header.Children.Add(new TextBlock { Text = "Versões da mesma foto", FontSize = 23, FontWeight = FontWeights.SemiBold });
-        header.Children.Add(new TextBlock { Text = "Encontre cópias com iluminação, compressão ou resolução alteradas. Os grupos são sugestões; compare antes de organizar. A sugestão de melhor cópia considera resolução, nitidez e exposição.", TextWrapping = TextWrapping.Wrap, Margin = new Thickness(4, 8, 4, 8) });
+        header.Children.Add(new TextBlock { Text = "Fotos semelhantes", FontSize = 23, FontWeight = FontWeights.SemiBold });
+        header.Children.Add(new TextBlock { Text = "Reúna versões da mesma foto e compare a melhor cópia.", Foreground = System.Windows.Media.Brushes.DimGray, Margin = new Thickness(0, 6, 0, 13) });
         var toolbar = new WrapPanel(); header.Children.Add(toolbar);
-        Add(toolbar, "Analisar / retomar biblioteca", Analyze); Add(toolbar, "Atualizar grupos", RefreshGroups);
-        Add(toolbar, "Comparar selecionadas", Compare); Add(toolbar, "Unir grupos selecionados", Join);
-        Add(toolbar, "Separar selecionadas do grupo", Separate); Add(toolbar, "Preferir cópia selecionada ★", Prefer);
-        Add(toolbar, "Desfazer organização", () => Change(() => index?.Undo())); Add(toolbar, "Mover selecionadas para lixeira…", Trash);
-        Add(toolbar, "Cancelar", Cancel); toolbar.Children.Add(neural); toolbar.Children.Add(force); toolbar.Children.Add(isolated);
-        toolbar.Children.Add(new TextBlock { Text = "Exigência visual:", VerticalAlignment = VerticalAlignment.Center }); toolbar.Children.Add(threshold);
+        Add(toolbar, "Analisar biblioteca", Analyze); Add(toolbar, "Atualizar", RefreshGroups); Add(toolbar, "Comparar", Compare); Add(toolbar, "Cancelar", Cancel);
+        var edits = new WrapPanel { Margin = new Thickness(0, 7, 0, 8) }; header.Children.Add(edits);
+        Add(edits, "Unir grupos", Join); Add(edits, "Separar", Separate); Add(edits, "Cópia preferida ★", Prefer); Add(edits, "Desfazer", () => Change(() => index?.Undo())); Add(edits, "Lixeira…", Trash);
+        var options = new Expander { Header = "Opções de comparação", Margin = new Thickness(3, 0, 3, 10) }; header.Children.Add(options);
+        var settingsPanel = new WrapPanel(); options.Content = settingsPanel; settingsPanel.Children.Add(neural); settingsPanel.Children.Add(force); settingsPanel.Children.Add(isolated);
+        settingsPanel.Children.Add(new TextBlock { Text = "Semelhança:", VerticalAlignment = VerticalAlignment.Center }); settingsPanel.Children.Add(threshold);
         DockPanel.SetDock(status, Dock.Bottom); root.Children.Add(status);
-        var columns = new Grid(); columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(310) }); columns.ColumnDefinitions.Add(new ColumnDefinition()); root.Children.Add(columns);
+        var columns = new Grid(); columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(250) }); columns.ColumnDefinitions.Add(new ColumnDefinition()); root.Children.Add(columns);
         columns.Children.Add(families); Grid.SetColumn(photos, 1); columns.Children.Add(photos);
-        var template = new DataTemplate(typeof(VisualPhoto)); var item = new FrameworkElementFactory(typeof(StackPanel)); item.SetValue(StackPanel.OrientationProperty, Orientation.Horizontal);
-        var image = new FrameworkElementFactory(typeof(Image)); image.SetValue(Image.WidthProperty, 160d); image.SetValue(Image.HeightProperty, 120d); image.SetBinding(Image.SourceProperty, new Binding("Thumbnail")); item.AppendChild(image);
-        var text = new FrameworkElementFactory(typeof(TextBlock)); text.SetBinding(TextBlock.TextProperty, new Binding("Description")); text.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap); text.SetValue(TextBlock.MarginProperty, new Thickness(10)); item.AppendChild(text); template.VisualTree = item; photos.ItemTemplate = template;
+        var virtualPanel = new FrameworkElementFactory(typeof(VirtualizingPhotoPanel)); photos.ItemsPanel = new ItemsPanelTemplate(virtualPanel);
+        ScrollViewer.SetCanContentScroll(photos, true); ScrollViewer.SetHorizontalScrollBarVisibility(photos, ScrollBarVisibility.Disabled);
+        var template = new DataTemplate(typeof(VisualPhoto)); var item = new FrameworkElementFactory(typeof(StackPanel)); item.SetValue(FrameworkElement.WidthProperty, 158d); item.SetValue(FrameworkElement.MarginProperty, new Thickness(6));
+        var image = new FrameworkElementFactory(typeof(Image)); image.SetValue(Image.WidthProperty, 150d); image.SetValue(Image.HeightProperty, 128d); image.SetBinding(Image.SourceProperty, new Binding("Thumbnail")); item.AppendChild(image);
+        var text = new FrameworkElementFactory(typeof(TextBlock)); text.SetBinding(TextBlock.TextProperty, new Binding("Description")); text.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap); text.SetValue(FrameworkElement.MaxHeightProperty, 34d); text.SetValue(TextBlock.TextTrimmingProperty, TextTrimming.CharacterEllipsis); text.SetValue(TextBlock.MarginProperty, new Thickness(2, 6, 2, 0)); item.AppendChild(text); template.VisualTree = item; photos.ItemTemplate = template;
         families.SelectionChanged += (_, _) => {
             if (families.SelectedItem is PhotoFamily family) { photos.ItemsSource = family.Photos.OrderByDescending(p => p.Id == family.Best.Id).ThenByDescending(VisualFeatures.BestScore).ToList(); status.Text = "Sugestão de melhor cópia: " + family.Best.Name + ". É uma avaliação heurística; o tamanho do arquivo não define a qualidade."; }
         };

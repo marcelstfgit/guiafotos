@@ -98,6 +98,15 @@ public sealed class PhotoEditor(ToolPaths tools, MediaLibrary library, FileActio
             case "restore": args.AddRange(["-despeckle", "-noise", "1", "-contrast-stretch", "0.5%x0.5%", "-unsharp", "0x0.5+0.5+0.02"]); break;
             case "rotate": var degree = options?.GetValueOrDefault("degrees") ?? "90"; if (degree is not ("90" or "180" or "270")) throw new ArgumentException("Rotação inválida."); args.AddRange(["-rotate", degree]); break;
             case "crop": var geometry = options?.GetValueOrDefault("geometry") ?? ""; if (!Regex.IsMatch(geometry, "^[1-9][0-9]{0,5}x[1-9][0-9]{0,5}\\+[0-9]{1,6}\\+[0-9]{1,6}$")) throw new ArgumentException("Recorte esperado: largura x altura + x + y, por exemplo 800x600+0+0."); args.AddRange(["-crop", geometry, "+repage"]); break;
+            case "adjust":
+                double Value(string key, double fallback, double minimum, double maximum)
+                {
+                    if (options?.GetValueOrDefault(key) is not { } text) return fallback;
+                    if (!double.TryParse(text, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var number) || !double.IsFinite(number) || number < minimum || number > maximum) throw new ArgumentException("Ajuste fora da faixa: " + key);
+                    return number;
+                }
+                var brightness = Value("brightness", 0, -100, 100); var contrast = Value("contrast", 0, -100, 100); var saturation = Value("saturation", 100, 0, 200);
+                args.AddRange(["-brightness-contrast", brightness.ToString(System.Globalization.CultureInfo.InvariantCulture) + "x" + contrast.ToString(System.Globalization.CultureInfo.InvariantCulture), "-modulate", "100," + saturation.ToString(System.Globalization.CultureInfo.InvariantCulture) + ",100"]); break;
             default: throw new ArgumentException("Operação de imagem não suportada.");
         }
         var target = Output(source, directory, "_" + operation, ".jpg"); var temp = target + ".partial";

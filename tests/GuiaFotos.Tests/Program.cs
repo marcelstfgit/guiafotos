@@ -22,6 +22,15 @@ var originalHash = await Files.Hash(photo); var imported = await library.Inspect
 Assert(imported.Sha256.Length == 0, "Importação não deve ler arquivo inteiro para SHA256.");
 // Integrity-sensitive operation fixtures explicitly capture the current full hash.
 var item = imported with { Sha256 = originalHash }; catalog.Add(item);
+await Test("ajustes de brilho, contraste e saturação alteram cópia e validam limites", async () => {
+    var adjusted = await editor.Edit(photo, Path.Combine(root, "out"), "adjust", new() { ["brightness"] = "25", ["contrast"] = "8", ["saturation"] = "120" });
+    var pixels = await Tools.Run(tools.Ffmpeg, ["-v", "error", "-i", photo, "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"]);
+    var changed = await Tools.Run(tools.Ffmpeg, ["-v", "error", "-i", adjusted, "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"]);
+    Assert(pixels.Length == changed.Length && !pixels.SequenceEqual(changed), "Ajustes não alteraram a cópia.");
+    await Throws(() => editor.Edit(photo, root, "adjust", new() { ["brightness"] = "NaN" }));
+    await Throws(() => editor.Edit(photo, root, "adjust", new() { ["saturation"] = "201" }));
+    Assert(await Files.Hash(photo) == originalHash, "Ajustes alteraram o original.");
+});
 await Test("AV1 decodifica por software sem aceleração de hardware", async () => {
     var avif = Path.Combine(root, "av1-software.avif");
     await Tools.Run(tools.Magick, ["-size", "48x48", "gradient:red-blue", avif]);
