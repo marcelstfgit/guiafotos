@@ -65,7 +65,7 @@ Licenças completas: tools/faces/adaface-LICENSE.txt, adaface-export-LICENSE.txt
 edgeface-LICENSE.txt e edgeface-export-LICENSE.txt.
 Hashes e URLs exatos por perfil: src/GuiaFotos.Core/FaceModels.cs; valores
 conferidos no registro primário https://github.com/yakhyo/uniface/blob/main/uniface/constants.py.
-Os arquivos de pesos não estão embutidos neste pacote. Licenças do código
+Os pesos faciais são baixados sob demanda. Licenças do código
 não substituem eventuais condições dos pesos e bases de treinamento.
 CVLFace ViT-KP-RPE foi pesquisado, mas não está implementado: seu pipeline
 exige landmarks como entrada adicional e validação da exportação ONNX.
@@ -75,7 +75,7 @@ https://github.com/deepinsight/insightface/tree/master/detection/scrfd
 Export/distribuição ONNX: https://github.com/yakhyo/uniface
 SHA2565838f7fe053675b1c7a08b633df49e7af5495cee0493c7dcf6697200b85b5b91
 O pacote não inclui o framework de treinamento SCRFD. Pesos pré-treinados têm condições próprias,
-descritas no projeto original. Nenhum peso SCRFD é embutido no pacote local.
+descritas no projeto original. Os pesos SCRFD são baixados sob demanda.
 
 SSCD opcional de build: https://github.com/facebookresearch/sscd-copy-detection
 Código MIT, Meta. Pesos originais sscd_disc_mixup.torchscript.pt no servidor
@@ -83,8 +83,9 @@ oficial dl.fbaipublicfiles.com. scripts/export-sscd.py registra SHA256 da
 entrada e do ONNX, exige paridade numérica <=1e-4 em12entradas e grava manifesto.
 A paridade não equivale a medir precisão em fotos. A licença é copiada para
 tools/sscd/LICENSE.txt quando o build -WithSscd for executado com sucesso.
-Não há SSCD/RDCD/PDQ embutido nesta compilação local: o agrupamento visual
-local usa implementação própria de luminância rank e comparação estrutural.
+A presença do SSCD e a verificação da exportação constam do relatório de
+cada pacote. O agrupador visual clássico usa implementação própria de
+luminância rank e comparação estrutural; não usa RDCD ou PDQ.
 Árvore VP e agrupamento DBSCAN com restrições: implementação própria C#;
 USearch/HDBSCAN/Immich não foram incorporados como bibliotecas nem copiados.
 

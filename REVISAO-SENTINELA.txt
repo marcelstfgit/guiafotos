@@ -1,21 +1,22 @@
-GuiaFotos 0.2.0 — revisão para pré-validação — 14/10/2026
+GuiaFotos 0.2.0 — revisão para pré-validação — 15/10/2026
 
-Revisão independente de código e integridade dos pacotes concluída.
-Não equivale a homologação de funcionamento ou precisão.
+Revisão independente do código e dos critérios de publicação.
+Não equivale a homologação de toda a interface ou da precisão facial.
 
-EVIDÊNCIAS LOCAIS
-- Compilação cruzada Windows x64 concluída em Linux ARM64.
-- 13 testes de agrupamento e 16 testes avançados passaram.
-- Índice vetorial comparado com força bruta; persistência, cancelamento,
-  correções de pessoas e famílias de fotos exercitados.
-- Variantes JPEG/WebP, brilho, resolução e orientação foram testadas com
-  imagens geradas. A inferência ONNX local usa um grafo Identity sintético.
-- Manifestos, hashes e inventários dos pacotes 0.2.0 conferidos.
+EVIDÊNCIA POR PACOTE
+- Após validação no CI, GuiaFotos-0.2.0-validacao-pacotes.json identifica
+  o commit e os testes concluídos; confira os arquivos com SHA256SUMS.
+- A Release exige as suítes de núcleo, modelos, agrupamento, instalador,
+  inicialização WPF e instalação/desinstalação/portátil sem falhas ou skips.
+- A evidência Windows cobre integração automatizada e smoke tests.
+- O corpus visual usa imagens geradas e transformadas. Paridade SSCD
+  e inferência com pesos treinados não medem precisão em uma coleção.
 
-PENDÊNCIAS
-- Executar interface, ferramentas, DPAPI e instalação no Windows real.
+PENDÊNCIAS DE QUALIDADE
+- Avaliar a interface e os fluxos completos em uso real no Windows.
 - Medir a precisão dos cinco reconhecedores e SCRFD com fotos rotuladas.
 - Validar Nextcloud de produção e integrações externas reais.
-- Executar a exportação/paridade SSCD; o modelo não está no pacote local.
+- A presença do SSCD e a paridade da exportação dependem do pacote;
+  consulte os campos sscd_included e sscd_export_parity_verified.
 
 Testes sintéticos não comprovam precisão em coleções de fotografias.

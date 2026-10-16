@@ -25,9 +25,9 @@ Os modelos faciais são baixados ao ativar cada motor; a análise de rostos e se
 
 ## Estado atual
 
-Compilação cruzada e testes locais de agrupamento, cache, persistência e variantes de imagens foram executados. Ainda precisamos validar a interface e a instalação em Windows real, medir a precisão facial com fotos representativas e testar Nextcloud de produção. Os testes locais não comprovam a precisão dos modelos treinados.
+Os testes locais cobrem agrupamento, cache, persistência e variantes de imagens. Quando um pacote passa pelo CI, seu relatório registra as verificações Windows concluídas e o commit testado. Testes automatizados e smoke tests não substituem a avaliação da interface em uso real, a medição de precisão facial com fotos representativas ou o teste de Nextcloud de produção.
 
-A integração opcional com SSCD está preparada; o modelo não acompanha o pacote local atual e sua exportação ainda precisa ser validada. Detalhes de uso e limites estão em [INSTRUCOES.txt](INSTRUCOES.txt) e [LEIA-ME-PACOTES.txt](LEIA-ME-PACOTES.txt).
+SSCD é opcional: sua presença e a verificação de paridade da exportação constam do relatório do pacote. Paridade numérica não mede precisão em fotos. Detalhes de uso e limites estão em [INSTRUCOES.txt](INSTRUCOES.txt) e [LEIA-ME-PACOTES.txt](LEIA-ME-PACOTES.txt).
 
 ## Compilar
 
@@ -37,7 +37,7 @@ No Windows, instale .NET SDK 8, Python 3.11+, 7-Zip e MSYS2 MINGW64. A primeira 
 .\build-windows.ps1
 ```
 
-O executável, o instalador e o ZIP portátil são gerados em `artifacts/`. O [workflow Windows](.github/workflows/windows.yml) reúne a compilação e as verificações automatizadas; sua execução no GitHub ainda está pendente.
+O executável, o instalador e o ZIP portátil são gerados em `artifacts/`. O [workflow Windows](.github/workflows/windows.yml) reúne a compilação e as verificações automatizadas; a publicação de uma tag exige que todas passem.
 
 ## Contribuir
 

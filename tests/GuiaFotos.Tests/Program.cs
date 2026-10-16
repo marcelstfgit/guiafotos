@@ -17,7 +17,7 @@ void Assert(bool condition, string message) { if (!condition) throw new Exceptio
 async Task Throws(Func<Task> action) { try { await action(); } catch { return; } throw new Exception("Esperava falha."); }
 var photo = Path.Combine(root, "foto coração 日本.jpg");
 await Tools.Run(tools.Magick, ["-size", "160x100", "gradient:#203030-#e4a273", photo]);
-await Tools.Run(tools.ExifTool, ["-overwrite_original", "-DateTimeOriginal=2025:12:25 14:15:16", "-GPSLatitude=12.5", "-GPSLongitude=20.1", "-XMP:Description=privado", "-IPTC:Keywords=teste", photo]);
+await Tools.Run(tools.ExifTool, ["-overwrite_original", "-charset", "FileName=UTF8", "-DateTimeOriginal=2025:12:25 14:15:16", "-GPSLatitude=12.5", "-GPSLongitude=20.1", "-XMP:Description=privado", "-IPTC:Keywords=teste", photo]);
 var originalHash = await Files.Hash(photo); var imported = await library.Inspect(photo);
 Assert(imported.Sha256.Length == 0, "Importação não deve ler arquivo inteiro para SHA256.");
 // Integrity-sensitive operation fixtures explicitly capture the current full hash.

@@ -11,7 +11,8 @@ Publicação condicionada aos testes automatizados Windows de compilação,
 núcleo, modelos, agrupamento, interface e instalação/desinstalação.
 Isso não mede a precisão facial em uma coleção representativa nem valida
 Nextcloud de produção. Os executáveis ainda não têm assinatura digital.
-Os fontes do aplicativo, FFmpeg/x264 e ImageMagick/delegates estão nos anexos.
+O relatório anexo registra o commit e as verificações concluídas neste pacote.
+Os fontes do aplicativo, FFmpeg/x264/dav1d e ImageMagick/delegates estão nos anexos.
 
 English (US)
 
@@ -26,4 +27,5 @@ Publication requires automated Windows build, core, model, grouping,
 interface, installation, and uninstallation checks to pass.
 These checks do not establish accuracy on a representative photo collection
 or validate a production Nextcloud server. Executables are not digitally signed.
-Application, FFmpeg/x264, and ImageMagick/delegate sources are attached.
+The attached report records the commit and completed checks for this package.
+Application, FFmpeg/x264/dav1d, and ImageMagick/delegate sources are attached.

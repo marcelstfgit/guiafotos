@@ -71,8 +71,8 @@ GuiaFotos é um projeto independente inspirado na organização local de fotos
 do Picasa. A importação de álbuns/Picasa.ini e a migração de seu banco de dados
 ainda não estão implementadas.
 
-Validação nesta entrega: compilação cruzada Windows x64 e testes do núcleo
-em Linux ARM64. Executar GUI, DPAPI e as ferramentas Windows no Windows real
-ainda requer o smoke test/workflow incluído. APIs com credenciais reais e
-Nextcloud de produção dependem da conta do usuário; os testes de protocolo
-usam servidor HTTP local e respostas controladas, sem custos de API.
+Validação: consulte GuiaFotos-0.2.0-validacao-pacotes.json junto aos downloads
+para identificar o commit e os testes Windows concluídos naquele pacote.
+Smoke tests não comprovam precisão facial nem toda a interação da interface.
+APIs com credenciais reais e Nextcloud de produção continuam sem validação;
+os testes de protocolo usam respostas controladas, sem custos de API.

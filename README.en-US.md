@@ -25,9 +25,9 @@ Face models are downloaded when you activate each engine; face and similarity an
 
 ## Current status
 
-Cross-compilation and local tests for grouping, caching, persistence, and image variants have been completed. We still need to validate the interface and installation on Windows, measure face recognition accuracy on representative photos, and test a production Nextcloud server. Local tests do not establish the accuracy of the trained models.
+Local tests cover grouping, caching, persistence, and image variants. When a package passes CI, its report records the completed Windows checks and the tested commit. Automated checks and smoke tests do not replace evaluating the interface in real use, measuring face recognition accuracy on representative photos, or testing a production Nextcloud server.
 
-Optional SSCD integration is prepared; the model is absent from the current local package, and its export still needs validation. Detailed usage notes and limitations are available in [INSTRUCOES.txt](INSTRUCOES.txt) and [LEIA-ME-PACOTES.txt](LEIA-ME-PACOTES.txt), in Portuguese.
+SSCD is optional: its inclusion and export parity check are recorded in the package report. Numerical parity does not measure accuracy on photos. Detailed usage notes and limitations are available in [INSTRUCOES.txt](INSTRUCOES.txt) and [LEIA-ME-PACOTES.txt](LEIA-ME-PACOTES.txt), in Portuguese.
 
 ## Build
 
@@ -37,7 +37,7 @@ On Windows, install .NET SDK 8, Python 3.11+, 7-Zip, and MSYS2 MINGW64. The firs
 .\build-windows.ps1
 ```
 
-The executable, installer, and portable ZIP are generated in `artifacts/`. The [Windows workflow](.github/workflows/windows.yml) runs the build and automated checks; its first GitHub run is still pending.
+The executable, installer, and portable ZIP are generated in `artifacts/`. The [Windows workflow](.github/workflows/windows.yml) runs the build and automated checks; publishing a tag requires all checks to pass.
 
 ## Contribute
 
