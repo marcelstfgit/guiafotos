@@ -1,0 +1,29 @@
+Português (Brasil)
+
+GuiaFotos 0.2.0 — versão de pré-validação para Windows 10/11 x64.
+Organização local, agrupamento de rostos e versões de fotos, duplicatas,
+edição em cópia e backup Nextcloud. Contribuições de programação são bem-vindas.
+
+Instalação: baixe GuiaFotos-0.2.0-Setup.exe e execute.
+Portátil: extraia todo o ZIP e execute GuiaFotos.exe. Preserve a pasta Data ao atualizar.
+
+Publicação condicionada aos testes automatizados Windows de compilação,
+núcleo, modelos, agrupamento, interface e instalação/desinstalação.
+Isso não mede a precisão facial em uma coleção representativa nem valida
+Nextcloud de produção. Os executáveis ainda não têm assinatura digital.
+Os fontes do aplicativo, FFmpeg/x264 e ImageMagick/delegates estão nos anexos.
+
+English (US)
+
+GuiaFotos 0.2.0 — preview build for Windows 10/11 x64.
+Local organization, face and photo-version grouping, duplicate detection,
+editing copies, and Nextcloud backup. Programming contributions are welcome.
+
+Install: download and run GuiaFotos-0.2.0-Setup.exe.
+Portable: extract the entire ZIP and run GuiaFotos.exe. Keep Data when updating.
+
+Publication requires automated Windows build, core, model, grouping,
+interface, installation, and uninstallation checks to pass.
+These checks do not establish accuracy on a representative photo collection
+or validate a production Nextcloud server. Executables are not digitally signed.
+Application, FFmpeg/x264, and ImageMagick/delegate sources are attached.

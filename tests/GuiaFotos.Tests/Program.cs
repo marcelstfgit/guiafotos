@@ -22,6 +22,12 @@ var originalHash = await Files.Hash(photo); var imported = await library.Inspect
 Assert(imported.Sha256.Length == 0, "Importação não deve ler arquivo inteiro para SHA256.");
 // Integrity-sensitive operation fixtures explicitly capture the current full hash.
 var item = imported with { Sha256 = originalHash }; catalog.Add(item);
+await Test("AV1 decodifica por software sem aceleração de hardware", async () => {
+    var avif = Path.Combine(root, "av1-software.avif");
+    await Tools.Run(tools.Magick, ["-size", "48x48", "gradient:red-blue", avif]);
+    var pixels = await Tools.Run(tools.Ffmpeg, ["-v", "error", "-hwaccel", "none", "-c:v", "libdav1d", "-i", avif, "-frames:v", "1", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"]);
+    Assert(pixels.Length == 48 * 48 * 3, "AV1 não produziu os pixels esperados por CPU.");
+});
 await Test("catálogo/miniatura/data Unicode; originais intactos", async () => { Assert(item.Taken.Year == 2025 && item.Taken.Month == 12, "Data EXIF ignorada."); Assert(File.Exists(item.Thumbnail), "Sem thumbnail."); Assert(await Files.Hash(photo) == originalHash, "Importação alterou original."); });
 await Test("metadados completos e edição efetiva em cópia", async () => { var edited = await editor.MetadataCopy(photo, Path.Combine(root, "out"), new Dictionary<string, string> { ["XMP:Description"] = "Novo título" }); var metadata = await library.Metadata(edited); Assert(metadata.Any(x => x.Key.EndsWith(":Description") && x.Value.ToString() == "Novo título"), "Edição não persistiu."); Assert(await Files.Hash(photo) == originalHash, "Original editado."); });
 await Test("bloqueia tags de caminho e coordenadas fora de faixa", async () => { await Throws(() => editor.MetadataCopy(photo, root, new Dictionary<string, string> { ["FileName"] = "outro.jpg" })); await Throws(() => editor.MetadataCopy(photo, root, new Dictionary<string, string> { ["GPSLatitude"] = "999" })); });

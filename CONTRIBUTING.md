@@ -18,11 +18,11 @@ Prioridades: validar o aplicativo no Windows, melhorar a precisão em coleções
 Use .NET SDK 8, Python 3.11+, 7-Zip e MSYS2 MINGW64 no Windows. No terminal MINGW64, instale as ferramentas e compile FFmpeg:
 
 ```bash
-pacman -S --needed make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python
+pacman -S --needed make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
 bash scripts/build-ffmpeg.sh
 ```
 
-Depois, no PowerShell, execute `./build-windows.ps1`. As ferramentas ficam em `tools/windows/`; os fontes correspondentes do FFmpeg/x264 são gerados em `artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip`.
+Depois, no PowerShell, execute `./build-windows.ps1`. As ferramentas ficam em `tools/windows/`; os fontes correspondentes do FFmpeg/x264/dav1d são gerados em `artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip`.
 
 ```powershell
 $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path

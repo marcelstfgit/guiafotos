@@ -84,8 +84,8 @@ def main():
     if (publish / "portable.marker").exists() or (publish / "Data").exists():
         raise ValueError("Não empacote um diretório portátil usado ou seus dados pessoais")
     ffmpeg = json.loads((publish / "tools/ffmpeg-build.json").read_text())
-    if ffmpeg["FfmpegCommit"] != "38b88335f9" or ffmpeg["X264Commit"] != "31e19f92f00c7003fa115047ce50978bc98c3a0d":
-        raise ValueError("FFmpeg/x264 não correspondem às fontes fixadas")
+    if ffmpeg["FfmpegCommit"] != "38b88335f9" or ffmpeg["X264Commit"] != "31e19f92f00c7003fa115047ce50978bc98c3a0d" or ffmpeg.get("Dav1dVersion") != "1.5.4":
+        raise ValueError("FFmpeg/x264/dav1d não correspondem às fontes fixadas")
     dependency_name = "GuiaFotos-0.2.0-fontes-dependencias.zip"
     dependency_source = ROOT / "artifacts" / dependency_name
     if ffmpeg["SourceArchive"] != dependency_name or not dependency_source.is_file() or sha256(dependency_source) != ffmpeg["SourceSha256"]:
@@ -96,6 +96,9 @@ def main():
     with zipfile.ZipFile(dependency_source) as dependencies:
         if dependencies.testzip():
             raise ValueError("ZIP de fontes de dependências corrompido")
+    imagemagick_source = ROOT / "artifacts/downloads/ImageMagick-7.1.2-33-Windows.7z"
+    if not imagemagick_source.is_file() or sha256(imagemagick_source) != "cccc7ba9e099d634d266dbe4d9d86443e39702abeaf77367cc01374a8ece91a3":
+        raise ValueError("Fontes oficiais ImageMagick/delegates ausentes ou alterados")
     sscd_dir = publish / "tools/sscd"
     sscd_included = (sscd_dir / "sscd-model.json").is_file()
     if sscd_included:
@@ -145,7 +148,9 @@ def main():
                     archive_file.write(path, "GuiaFotos/" + rel.as_posix())
         dependency_zip = Path(temp) / dependency_name
         shutil.copy2(dependency_source, dependency_zip)
-        products = [setup, portable, source_zip, dependency_zip]
+        imagemagick_archive = Path(temp) / imagemagick_source.name
+        shutil.copy2(imagemagick_source, imagemagick_archive)
+        products = [setup, portable, source_zip, dependency_zip, imagemagick_archive]
         report = {
             "version": VERSION,
             "installer_files": len(installed_manifest), "portable_files": len(portable_manifest),

@@ -24,7 +24,8 @@ function Get-VerifiedDownload([string]$Destination, [string[]]$Urls, [string]$Ha
 }
 $archives = @(
     @{ Name="exiftool-13.59_64.zip"; Urls=@("https://downloads.sourceforge.net/project/exiftool/exiftool-13.59_64.zip", "https://sourceforge.net/projects/exiftool/files/exiftool-13.59_64.zip/download"); Hash="44b512b25af500724ba579d0a53c8fc5851628b692dd5e5d94ae4a15c2cba9ec" },
-    @{ Name="imagemagick-7.1.2-33-x64.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"); Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" }
+    @{ Name="imagemagick-7.1.2-33-x64.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-portable-Q16-x64.7z"); Hash="5c242a23c4343add3f3bbdf265e74baa28d97d565a7b2a7c2827a4c3c449c278" },
+    @{ Name="ImageMagick-7.1.2-33-Windows.7z"; Urls=@("https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-33/ImageMagick-7.1.2-33-Windows.7z"); Hash="cccc7ba9e099d634d266dbe4d9d86443e39702abeaf77367cc01374a8ece91a3" }
 )
 foreach ($archive in $archives) {
     $destination = Join-Path $downloadDir $archive.Name
@@ -41,7 +42,7 @@ if ($LASTEXITCODE -ne 0) { throw "Instale 7-Zip para extrair ImageMagick." }
 $ffmpegManifest = Join-Path $nativeDir "ffmpeg-build.json"
 if (!(Test-Path $ffmpegManifest)) { throw "Compile FFmpeg primeiro: bash scripts/build-ffmpeg.sh em MSYS2 MINGW64. Consulte CONTRIBUTING.md." }
 $ffmpegBuild = Get-Content -Raw $ffmpegManifest | ConvertFrom-Json
-if ($ffmpegBuild.FfmpegCommit -ne "38b88335f9" -or $ffmpegBuild.X264Commit -ne "31e19f92f00c7003fa115047ce50978bc98c3a0d") { throw "Versões do FFmpeg/x264 diferentes das fontes fixadas." }
+if ($ffmpegBuild.FfmpegCommit -ne "38b88335f9" -or $ffmpegBuild.X264Commit -ne "31e19f92f00c7003fa115047ce50978bc98c3a0d" -or $ffmpegBuild.Dav1dVersion -ne "1.5.4") { throw "Versões do FFmpeg/x264/dav1d diferentes das fontes fixadas." }
 foreach ($binary in $ffmpegBuild.Binaries.PSObject.Properties) {
     if ((Get-FileHash (Join-Path $nativeDir $binary.Name) -Algorithm SHA256).Hash.ToLowerInvariant() -ne $binary.Value) { throw "FFmpeg adulterado: $($binary.Name)" }
 }

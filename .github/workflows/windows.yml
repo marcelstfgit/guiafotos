@@ -1,5 +1,12 @@
 name: Windows build and smoke test
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   windows:
     runs-on: windows-latest
@@ -12,6 +19,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Release gate regression tests
+        shell: pwsh
+        run: python -m unittest discover -s tests -p test_release_validation.py
       - uses: actions/cache/restore@v4
         id: ffmpeg-cache
         with:
@@ -26,7 +36,7 @@ jobs:
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         with:
           msystem: MINGW64
-          install: make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python
+          install: make nasm diffutils curl mingw-w64-x86_64-gcc mingw-w64-x86_64-pkgconf mingw-w64-x86_64-python mingw-w64-x86_64-meson mingw-w64-x86_64-ninja
       - name: Build FFmpeg with corresponding sources
         if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         shell: msys2 {0}
@@ -48,6 +58,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -m pip install numpy==1.26.4 onnx==1.17.0 onnxruntime==1.20.1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/cache/restore@v4
+        id: tools-cache
+        with:
+          key: windows-tools-${{ hashFiles('build-windows.ps1') }}
+          path: artifacts/downloads
       - name: Build Windows package with pinned tools
         shell: pwsh
         run: |
@@ -59,6 +74,11 @@ jobs:
             $_ | Format-List * -Force
             exit 1
           }
+      - uses: actions/cache/save@v4
+        if: steps.tools-cache.outputs.cache-hit != 'true'
+        with:
+          key: windows-tools-${{ hashFiles('build-windows.ps1') }}
+          path: artifacts/downloads
       - name: Core integration tests including DPAPI and Windows tools
         shell: pwsh
         run: |
@@ -70,6 +90,7 @@ jobs:
           $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--smoke-test' -PassThru
           if (!$process.WaitForExit(30000)) { $process.Kill(); throw 'WPF smoke test timed out' }
           if ($process.ExitCode -ne 0) { throw 'WPF smoke test failed' }
+          'PASS WPF initialization and shutdown' | Set-Content -Encoding utf8 artifacts/test-wpf.log
       - name: Native recognition, trained models, person search and fast duplicate tests
         shell: pwsh
         run: |
@@ -88,10 +109,15 @@ jobs:
           ./scripts/run-tests.ps1 -Project installer/tests/Setup.Tests.csproj -Log artifacts/test-installer.log
       - name: Install, launch, uninstall and portable smoke tests
         shell: pwsh
-        run: ./installer/test-windows.ps1
+        run: ./installer/test-windows.ps1 2>&1 | Tee-Object -FilePath artifacts/test-install-portable.log
+      - name: Record completed Windows checks
+        shell: pwsh
+        run: python scripts/record-windows-validation.py
       - uses: actions/upload-artifact@v4
         with:
           name: GuiaFotos-windows-x64
+          if-no-files-found: error
+          compression-level: 0
           path: |
             artifacts/GuiaFotos-0.2.0-Setup.exe
             artifacts/GuiaFotos-0.2.0-portatil-windows-x64.zip
@@ -99,3 +125,35 @@ jobs:
             artifacts/GuiaFotos-0.2.0-fontes-dependencias.zip
             artifacts/GuiaFotos-0.2.0-SHA256SUMS.txt
             artifacts/GuiaFotos-0.2.0-validacao-pacotes.json
+            artifacts/ImageMagick-7.1.2-33-Windows.7z
+  release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: GuiaFotos-windows-x64
+          path: artifacts
+      - name: Verify release artifacts and Windows evidence
+        run: python3 scripts/record-windows-validation.py --verify-only
+      - name: Publish preview release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME"
+          --verify-tag --prerelease
+          --title "GuiaFotos ${GITHUB_REF_NAME#v}"
+          --notes-file RELEASE-NOTES.txt
+          artifacts/GuiaFotos-*-Setup.exe
+          artifacts/GuiaFotos-*-portatil-windows-x64.zip
+          artifacts/GuiaFotos-*-fonte.zip
+          artifacts/GuiaFotos-*-fontes-dependencias.zip
+          artifacts/GuiaFotos-*-SHA256SUMS.txt
+          artifacts/GuiaFotos-*-validacao-pacotes.json
+          artifacts/ImageMagick-7.1.2-33-Windows.7z
