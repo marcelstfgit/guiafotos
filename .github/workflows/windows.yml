@@ -64,6 +64,7 @@ jobs:
           key: windows-tools-${{ hashFiles('build-windows.ps1') }}
           path: artifacts/downloads
       - name: Build Windows package with pinned tools
+        id: package
         shell: pwsh
         run: |
           try { ./build-windows.ps1 -WithSscd }
@@ -80,18 +81,27 @@ jobs:
           key: windows-tools-${{ hashFiles('build-windows.ps1') }}
           path: artifacts/downloads
       - name: Core integration tests including DPAPI and Windows tools
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
           ./scripts/run-tests.ps1 -Project tests/GuiaFotos.Tests -Log artifacts/test-core.log
       - name: WPF launch smoke test
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
-          $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--smoke-test' -PassThru
+          $env:GUIAFOTOS_SMOKE_LOG = Join-Path (Resolve-Path artifacts).Path 'wpf-smoke-error.log'
+          $process = Start-Process artifacts/windows-x64/GuiaFotos.exe -ArgumentList '--smoke-test' -PassThru -RedirectStandardOutput artifacts/wpf-stdout.log -RedirectStandardError artifacts/wpf-stderr.log
           if (!$process.WaitForExit(30000)) { $process.Kill(); throw 'WPF smoke test timed out' }
-          if ($process.ExitCode -ne 0) { throw 'WPF smoke test failed' }
+          if ($process.ExitCode -ne 0) {
+            $details = (Get-Content artifacts/wpf-smoke-error.log, artifacts/wpf-stdout.log, artifacts/wpf-stderr.log -ErrorAction SilentlyContinue | Out-String).Trim()
+            $message = "WPF exit $($process.ExitCode): $details".Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+            Write-Host "::error::$message"
+            throw 'WPF smoke test failed'
+          }
           'PASS WPF initialization and shutdown' | Set-Content -Encoding utf8 artifacts/test-wpf.log
       - name: Native recognition, trained models, person search and fast duplicate tests
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
@@ -99,15 +109,18 @@ jobs:
           $env:GUIAFOTOS_TEST_PRETRAINED = '1'
           ./scripts/run-tests.ps1 -Project tests/GuiaFotos.AdvancedTests/GuiaFotos.AdvancedTests.csproj -Log artifacts/test-advanced.log
       - name: Full grouping, persistent index, corrections and image variants
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
           $env:GUIAFOTOS_TOOLS_ROOT = (Resolve-Path artifacts/windows-x64).Path
           ./scripts/run-tests.ps1 -Project tests/GuiaFotos.GroupingTests -Log artifacts/test-grouping.log
       - name: Installer integrity and removal path tests
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: |
           ./scripts/run-tests.ps1 -Project installer/tests/Setup.Tests.csproj -Log artifacts/test-installer.log
       - name: Install, launch, uninstall and portable smoke tests
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         shell: pwsh
         run: ./installer/test-windows.ps1 2>&1 | Tee-Object -FilePath artifacts/test-install-portable.log
       - name: Record completed Windows checks
