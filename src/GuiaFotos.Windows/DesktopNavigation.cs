@@ -220,6 +220,6 @@ public partial class MainWindow
         else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.E) { ExportSelected(sender, e); e.Handled = true; }
         else if (e.Key == Key.F5) { RefreshFolder(sender, e); e.Handled = true; }
         else if (EditorScreen.Visibility == Visibility.Visible)
-        { if (e.Key == Key.Escape) { if (Preview.CropMode) CancelCrop(sender, e); else BackToLibrary(sender, e); e.Handled = true; } else if (e.Key == Key.Left) { PreviousPhoto(sender, e); e.Handled = true; } else if (e.Key == Key.Right) { NextPhoto(sender, e); e.Handled = true; } }
+        { if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.Z) { if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift)) RedoPreview(sender, e); else UndoPreview(sender, e); e.Handled = true; } else if (Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && e.Key == Key.Y) { RedoPreview(sender, e); e.Handled = true; } else if (e.Key == Key.Escape) { if (Preview.CropMode) CancelCrop(sender, e); else BackToLibrary(sender, e); e.Handled = true; } else if (e.Key == Key.Left) { PreviousPhoto(sender, e); e.Handled = true; } else if (e.Key == Key.Right) { NextPhoto(sender, e); e.Handled = true; } }
     }
 }
