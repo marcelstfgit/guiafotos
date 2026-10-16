@@ -1,7 +1,7 @@
 {
-  "commit": "d6ce97d8abe589e0c5137650883f23d607ec41db",
+  "commit": "a582a52cb83c56e932b9cf779fa9654310eecf20",
   "scope": "real WPF rendering and automated desktop flow; screenshots still require human visual review",
-  "passed": 63,
+  "passed": 64,
   "failed": 0,
   "checks": [
     "capture viewport biblioteca-vazia-1366: 1366x768 DIPs, requested 1366x768",
@@ -30,6 +30,7 @@
     "capture viewport editor-1366: 1366x768 DIPs, requested 1366x768",
     "editor has a large photo canvas",
     "undo and redo stay visible without scrolling the tools",
+    "light and color apply action fits above the fixed editor actions",
     "visual crop maps normalized bounds to exact original pixels",
     "capture viewport recorte-1366: 1366x768 DIPs, requested 1366x768",
     "apply visual crop creates a derivative with the selected pixel dimensions",
@@ -110,7 +111,7 @@
     },
     {
       "file": "editor-1366.png",
-      "sha256": "f5f7121e6b3fe05bb30970d688333caa0279a3763699c83388bfce47d806a75b",
+      "sha256": "3ce287c7f323da8c0bbb98f5a2a54eeec12754c2cf16c6231d49d533bfad164b",
       "viewport_dips": [
         1366,
         768
@@ -123,7 +124,7 @@
     },
     {
       "file": "recorte-1366.png",
-      "sha256": "5360d75544ce36f90a5ca46b581831fa58a9351b6109a1692db05298e0e2b265",
+      "sha256": "63e1f05c96d7dd93748e7353e126837e51da0a161f6c609840d93413c5a6c6c9",
       "viewport_dips": [
         1366,
         768
